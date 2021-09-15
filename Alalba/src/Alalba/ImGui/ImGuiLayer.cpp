@@ -54,7 +54,7 @@ namespace Alalba {
     //     style.Colors[ImGuiCol_WindowBg].w = 1.0f;
     // }
     Application& app = Application::Get();
-    GLFWwindow* window = app.GetWindow().GetNativeWindow();
+    GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());
 
         // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -92,8 +92,6 @@ namespace Alalba {
     }
     void ImGuiLayer::OnImGuiRender()
     {
-      static bool show = true;
-		  ImGui::ShowDemoWindow(&show);
     }
 	
 	

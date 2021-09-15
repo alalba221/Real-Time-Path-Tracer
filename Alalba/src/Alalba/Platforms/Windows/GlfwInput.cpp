@@ -1,5 +1,5 @@
 #include "alalbapch.h"
-#include "WindowsInput.h"
+#include "GlfwInput.h"
 
 #include "Alalba/Core/Application.h"
 #include <GLFW/glfw3.h>

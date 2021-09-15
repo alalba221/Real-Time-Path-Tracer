@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Alalba/Core/Events/ApplicationEvent.h"
 #include "Alalba/Core/Log.h"
+#include "Alalba/Renderer/Renderer.h"
 #include <glad/glad.h>
 namespace Alalba{
   #define BIND_ENVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
@@ -11,7 +12,7 @@ namespace Alalba{
   Application::Application(){
 		s_Instance = this;
 		
-	  m_Window = std::unique_ptr<Window>(new Window(WindowProps()));
+	  m_Window = std::unique_ptr<Window>(Window::Create());
     m_Window->SetEventCallback(BIND_ENVENT_FN(Application::OnEvent));
 
 		m_ImGuiLayer = new ImGuiLayer();
@@ -55,6 +56,12 @@ namespace Alalba{
 		m_ImGuiLayer->End();
 
 	}
+
+	bool Application::OnWindowResize(WindowResizeEvent& e)
+	{
+		return false;
+	}
+
   bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
 		m_Running = false;	
@@ -71,17 +78,16 @@ namespace Alalba{
 			ALALBA_APP_TRACE(e->ToString() );
 		}
     while(m_Running){
-      glClearColor(1, 0, 1, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
-
+			// Maybe we should put the clear command into the Que Here
+			// Not in the each layer->OnUpdate() function
 			for (Layer* layer : m_LayerStack)
 				layer->OnUpdate();
 
 			Application* app = this;
-			this->RenderImGui();
-
+			//this->RenderImGui();
+			ALALBA_RENDER_1(app, { app->RenderImGui(); });
+			Renderer::Get().WaitAndRender();
 			m_Window->OnUpdate();
-
     }
   }
 }

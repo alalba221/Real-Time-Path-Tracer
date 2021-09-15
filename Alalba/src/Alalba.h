@@ -15,5 +15,7 @@
 #include "Alalba/Core/MouseButtonCodes.h"
 
 #include "Alalba/ImGui/ImGuiLayer.h"
+#include "Alalba/Renderer/Renderer.h"
+#include "imgui/imgui.h"
 //Entry Point
 #include "Alalba/EntryPoint.h"

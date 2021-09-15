@@ -4,10 +4,8 @@
 #include "Alalba/Core/Base.h"
 #include "Alalba/Core/Events/Event.h"
 
-#include <GLFW/glfw3.h>
 namespace Alalba
 {
-
 	class WindowProps 
 	{
 	public:
@@ -30,37 +28,24 @@ namespace Alalba
 	public:
 	
   	using EventCallbackFn = std::function<void(Event&)>;
-		Window(const WindowProps& props);
+		
+		Window() = default;
 
-		virtual ~Window();
+		virtual ~Window() = default;
 
-		void OnUpdate();
+		virtual void OnUpdate() = 0;
 
-		inline unsigned int GetWidth()const { return m_Data.Width; };
-		inline unsigned int GetHeight() const { return m_Data.Height; };
+		virtual unsigned int GetWidth()const = 0;
+		virtual unsigned int GetHeight() const = 0;
 
 		//Window Attribute
-		inline void SetEventCallback(const EventCallbackFn& callback) { m_Data.EventCallback = callback; };
-		void SetVSync(bool enabled);
-		bool IsVSync()const;
-		inline virtual GLFWwindow* GetNativeWindow() const { return m_Window; };
+		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
+		virtual void SetVSync(bool enabled) = 0;
+		virtual bool IsVSync()const = 0;
+
+		virtual void* GetNativeWindow() const = 0;
 	
 		static Window* Create(const WindowProps& props = WindowProps());
-  private:
-		virtual void Init(const WindowProps& props);
-		virtual void Shutdown();
-	private:
-		GLFWwindow* m_Window;
-		
-		struct WindowData 
-		{
-			std::string Title;
-			unsigned int Width, Height;
-
-			bool VSync;
-			EventCallbackFn EventCallback;
-		};
-		WindowData m_Data;
 	};
 
 }

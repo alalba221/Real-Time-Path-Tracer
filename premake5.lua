@@ -60,7 +60,7 @@ project "Alalba"
 		cppdialect "C++17"
 		staticruntime "On"
 		systemversion "latest"
-
+		buildoptions "-fpermissive"
 		defines
 		{
 			"ALALBA_PLATFORM_LINUX",
@@ -107,13 +107,14 @@ project "Sandbox"
 		}
 		links
 		{
-			"Alalba"
+			"Alalba",
+			"ImGui"
 		}
 		filter "system:linux"
 			cppdialect "C++17"
 			staticruntime "On"
 			systemversion "latest"
-	
+			buildoptions "-fpermissive"
 			defines
 			{
 				"ALALBA_PLATFORM_LINUX"

@@ -1,9 +1,9 @@
 #include "alalbapch.h"
-#include "Window.h"
-#include "Events/Event.h"
-#include "Events/ApplicationEvent.h"
-#include "Events/KeyEvent.h"
-#include "Events/MouseEvent.h"
+#include "GlfwWindow.h"
+#include "Alalba/Core/Events/Event.h"
+#include "Alalba/Core/Events/ApplicationEvent.h"
+#include "Alalba/Core/Events/KeyEvent.h"
+#include "Alalba/Core/Events/MouseEvent.h"
 #include "Alalba/Core/Log.h"
 
 
@@ -16,24 +16,24 @@ namespace Alalba
 	{
 		ALALBA_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
 	}
-	// Window* Window::Create(const WindowProps& props)
-	// {
-	// 	return new Window(props);
-	// }
-	Window::Window(const WindowProps& prop)
+	Window* Window::Create(const WindowProps& props)
+	{
+		return new GlfwWindow(props);
+	}
+	GlfwWindow::GlfwWindow(const WindowProps& prop)
 	{
 		Init(prop);
 	}
-	Window::~Window()
+	GlfwWindow::~GlfwWindow()
 	{
 		Shutdown();
 	}
-	void Window::OnUpdate()
+	void GlfwWindow::OnUpdate()
 	{
 		glfwSwapBuffers(m_Window);
 		glfwPollEvents();
 	}
-	void Window::SetVSync(bool enabled)
+	void GlfwWindow::SetVSync(bool enabled)
 	{
 		if (enabled)
 		{
@@ -45,12 +45,12 @@ namespace Alalba
 		}
 		m_Data.VSync = enabled;
 	}
-	bool Window::IsVSync() const
+	bool GlfwWindow::IsVSync() const
 	{
 		return m_Data.VSync;
 	}
 
-	void Window::Init(const WindowProps& props)
+	void GlfwWindow::Init(const WindowProps& props)
 	{
 		m_Data.Title = props.Title;
 		m_Data.Height = props.Height;
@@ -167,7 +167,7 @@ namespace Alalba
 				data.EventCallback(event);
 			});
 	 }
-	void Window::Shutdown()
+	void GlfwWindow::Shutdown()
 	{
 		glfwDestroyWindow(m_Window);
 	}
