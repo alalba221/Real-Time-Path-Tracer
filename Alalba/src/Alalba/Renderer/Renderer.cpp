@@ -4,10 +4,11 @@
 namespace Alalba {
 
 	Renderer* Renderer::s_Instance = new Renderer();
-	
+	RendererAPIType RendererAPI::s_CurrentRendererAPI = RendererAPIType::OpenGL;
+
 	void Renderer::Init()
 	{
-
+		ALALBA_RENDER({ RendererAPI::Init(); });
 	}
 
 	void Renderer::Clear()
@@ -28,6 +29,12 @@ namespace Alalba {
 
 	void Renderer::SetClearColor(float r, float g, float b, float a)
 	{
+	}
+	void Renderer::DrawIndexed(unsigned int count)
+	{
+		ALALBA_RENDER_1(count, {
+			RendererAPI::DrawIndexed(count);
+		});
 	}
 
 	void Renderer::WaitAndRender()

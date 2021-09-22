@@ -35,7 +35,7 @@ namespace Alalba {
 
 	void RenderCommandQueue::Execute()
 	{
-		ALALBA_RENDER_TRACE("RenderCommandQueue::Execute -- {0} commands, {1} bytes", m_CommandCount, (m_CommandBufferPtr - m_CommandBuffer));
+		//ALALBA_RENDER_TRACE("RenderCommandQueue::Execute -- {0} commands, {1} bytes", m_CommandCount, (m_CommandBufferPtr - m_CommandBuffer));
 
 		unsigned char* buffer = m_CommandBuffer;
 

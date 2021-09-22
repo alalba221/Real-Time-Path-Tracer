@@ -24,8 +24,8 @@ public:
 
 	void OnUpdate() override
 	{
-		if (Alalba::Input::IsMouseButtonPressed(ALALBA_MOUSE_BUTTON_1))
-			ALALBA_APP_TRACE("Mouse key is pressed (poll)!");
+		if (Alalba::Input::IsMouseButtonPressed(ALALBA_MOUSE_BUTTON_LEFT))
+			ALALBA_APP_TRACE("Mouse left key is pressed (poll)!");
 		Alalba::Renderer::Clear(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], m_ClearColor[3]);
 	}
 
@@ -46,7 +46,7 @@ public:
 		if (event.GetEventType() == Alalba::EventType::KeyPressed)
 		{
 			Alalba::KeyPressedEvent& e = (Alalba::KeyPressedEvent&)event;
-			if (e.GetKeyCode() == ALALBA_KEY_TAB)
+			if (e.GetKeyCode() == ALALBA_TAB)
 					ALALBA_APP_TRACE("Tab key is pressed (event)!");
 			//	ALALBA_APP_TRACE("{0}", (char)e.GetKeyCode());
 		}

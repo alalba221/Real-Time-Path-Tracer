@@ -4,7 +4,7 @@
 
 namespace Alalba {
 
-	class GlfwInput : public Input
+	class SDLInput : public Input
 	{
 	protected:
 		virtual bool IsKeyPressedImpl(int keycode) override;

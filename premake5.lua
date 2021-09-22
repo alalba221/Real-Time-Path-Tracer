@@ -6,7 +6,6 @@ workspace "Alalba"
 		"Release",
 		"Dist"
 	}
-
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 
@@ -16,11 +15,14 @@ IncludeDir["GLFW"] = "Alalba/vendor/GLFW/include"
 IncludeDir["Glad"] = "Alalba/vendor/Glad/include"
 IncludeDir["spdlog"] = "Alalba/vendor/spdlog/include"
 IncludeDir["imgui"] = "Alalba/vendor/imgui"
+IncludeDir["SDL"] = "Alalba/vendor/SDL"
+
 
 group"Dependencies"
 	include "Alalba/vendor/GLFW"
 	include "Alalba/vendor/Glad"
 	include "Alalba/vendor/imgui"
+	--include "Alalba/vendor/SDL"
 group""
 
 
@@ -54,7 +56,8 @@ project "Alalba"
 		"GLFW",
 		"dl",
 		"pthread",
-		"ImGui"
+		"ImGui",
+		"SDL2"
 	}
 	filter "system:linux"
 		cppdialect "C++17"
@@ -65,7 +68,9 @@ project "Alalba"
 		{
 			"ALALBA_PLATFORM_LINUX",
 			"ALALBA_BUILD_DLL",
-			"GLFW_INCLUDE_NONE"
+			"GLFW_INCLUDE_NONE",
+
+			"SDL_WINDOW_API"
 		}
 	postbuildcommands
 		{
@@ -108,7 +113,8 @@ project "Sandbox"
 		links
 		{
 			"Alalba",
-			"ImGui"
+			"ImGui",
+			"SDL2"
 		}
 		filter "system:linux"
 			cppdialect "C++17"
@@ -117,7 +123,9 @@ project "Sandbox"
 			buildoptions "-fpermissive"
 			defines
 			{
-				"ALALBA_PLATFORM_LINUX"
+				"ALALBA_PLATFORM_LINUX",
+
+				"SDL_WINDOW_API"
 			}
 		filter "configurations:Debug"
 			defines "ALALBA_DEBUG"

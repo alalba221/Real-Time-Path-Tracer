@@ -16,10 +16,7 @@ namespace Alalba
 	{
 		ALALBA_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
 	}
-	Window* Window::Create(const WindowProps& props)
-	{
-		return new GlfwWindow(props);
-	}
+
 	GlfwWindow::GlfwWindow(const WindowProps& prop)
 	{
 		Init(prop);
@@ -154,7 +151,7 @@ namespace Alalba
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-
+			
 				MouseScrolledEvent event((float)xOffset, (float)yOffset);
 				data.EventCallback(event);
 			});

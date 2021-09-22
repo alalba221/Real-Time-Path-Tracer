@@ -17,7 +17,8 @@ namespace Alalba{
 
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlayer(m_ImGuiLayer);
-
+		
+		Renderer::Init();
   }
   Application::~Application(){
 
@@ -84,7 +85,6 @@ namespace Alalba{
 				layer->OnUpdate();
 
 			Application* app = this;
-			//this->RenderImGui();
 			ALALBA_RENDER_1(app, { app->RenderImGui(); });
 			Renderer::Get().WaitAndRender();
 			m_Window->OnUpdate();

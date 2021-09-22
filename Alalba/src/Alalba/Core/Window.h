@@ -1,11 +1,14 @@
 #pragma once
 
-#include "alalbapch.h"
 #include "Alalba/Core/Base.h"
 #include "Alalba/Core/Events/Event.h"
 
 namespace Alalba
 {
+	enum class WindowAPI{
+		GLFW = 0,
+		SDL = 1
+	};
 	class WindowProps 
 	{
 	public:
@@ -34,7 +37,7 @@ namespace Alalba
 		virtual ~Window() = default;
 
 		virtual void OnUpdate() = 0;
-
+		virtual void Shutdown() = 0;
 		virtual unsigned int GetWidth()const = 0;
 		virtual unsigned int GetHeight() const = 0;
 
@@ -46,6 +49,14 @@ namespace Alalba
 		virtual void* GetNativeWindow() const = 0;
 	
 		static Window* Create(const WindowProps& props = WindowProps());
+		inline static WindowAPI GetAPI(){return s_WindowAPI;}
+		inline static WindowAPI SetAPI(WindowAPI api)
+		{
+			s_WindowAPI = api; 
+			return s_WindowAPI;
+		}
+	private:
+		static WindowAPI s_WindowAPI;
 	};
 
 }
