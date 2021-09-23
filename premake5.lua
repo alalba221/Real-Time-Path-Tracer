@@ -16,7 +16,7 @@ IncludeDir["Glad"] = "Alalba/vendor/Glad/include"
 IncludeDir["spdlog"] = "Alalba/vendor/spdlog/include"
 IncludeDir["imgui"] = "Alalba/vendor/imgui"
 IncludeDir["SDL"] = "Alalba/vendor/SDL"
-
+IncludeDir["glm"] = "Alalba/vendor/glm"
 --startproject "Sandbox"
 group"Dependencies"
 	include "Alalba/vendor/GLFW"
@@ -48,7 +48,8 @@ project "Alalba"
 		"%{IncludeDir.spdlog}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.GLFW}",
-		"%{IncludeDir.imgui}"
+		"%{IncludeDir.imgui}",
+		"%{IncludeDir.glm}"
 	}
 	links
 	{
@@ -108,7 +109,8 @@ project "Sandbox"
 		{
 			"Alalba/src",
 			"%{IncludeDir.spdlog}",
-			"Alalba/vendor"
+			"Alalba/vendor",
+			"%{IncludeDir.glm}"
 		}
 		links
 		{

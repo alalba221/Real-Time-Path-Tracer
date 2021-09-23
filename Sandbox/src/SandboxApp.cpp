@@ -1,4 +1,6 @@
 #include "Alalba.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 static void ImGuiShowHelpMarker(const char* desc)
 {
@@ -79,7 +81,7 @@ public:
 		std::unique_ptr<Alalba::VertexBuffer> m_VB;
 		std::unique_ptr<Alalba::IndexBuffer> m_IB;
 		std::unique_ptr<Alalba::Shader> m_Shader;
-
+		glm::vec4 m_TriangleColor;
 };
 
 class Sandbox : public Alalba::Application{
