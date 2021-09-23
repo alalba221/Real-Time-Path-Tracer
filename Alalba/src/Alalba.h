@@ -15,7 +15,14 @@
 #include "Alalba/Core/MouseButtonCodes.h"
 
 #include "Alalba/ImGui/ImGuiLayer.h"
-#include "Alalba/Renderer/Renderer.h"
 #include "imgui/imgui.h"
+
+// ---  Render API ------------------------------
+#include "Alalba/Renderer/Renderer.h"
+#include "Alalba/Renderer/FrameBuffer.h"
+#include "Alalba/Renderer/VertexBuffer.h"
+#include "Alalba/Renderer/IndexBuffer.h"
+#include "Alalba/Renderer/Texture.h"
+#include "Alalba/Renderer/Shader.h"
 //Entry Point
 #include "Alalba/EntryPoint.h"

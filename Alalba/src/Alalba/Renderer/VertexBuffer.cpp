@@ -7,8 +7,8 @@ namespace Alalba {
 	{
 		switch (RendererAPI::Current())
 		{
-			// case RendererAPIType::None:    return nullptr;
-			// case RendererAPIType::OpenGL:  return new OpenGLVertexBuffer(size);
+			case RendererAPIType::None:    return nullptr;
+			case RendererAPIType::OpenGL:  return new OpenGLVertexBuffer(size);
 		}
 		return nullptr;
 

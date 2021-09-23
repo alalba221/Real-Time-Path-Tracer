@@ -13,6 +13,7 @@ namespace Alalba
 
 	SDLWindow::SDLWindow(const WindowProps& prop)
 	{
+		ALALBA_CORE_INFO("SDL WINDOW API");
 		Init(prop);
 	}
 	SDLWindow::~SDLWindow()

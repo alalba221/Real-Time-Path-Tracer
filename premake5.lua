@@ -17,7 +17,7 @@ IncludeDir["spdlog"] = "Alalba/vendor/spdlog/include"
 IncludeDir["imgui"] = "Alalba/vendor/imgui"
 IncludeDir["SDL"] = "Alalba/vendor/SDL"
 
-
+--startproject "Sandbox"
 group"Dependencies"
 	include "Alalba/vendor/GLFW"
 	include "Alalba/vendor/Glad"
@@ -68,14 +68,14 @@ project "Alalba"
 		{
 			"ALALBA_PLATFORM_LINUX",
 			"ALALBA_BUILD_DLL",
-			"GLFW_INCLUDE_NONE",
-
-			"SDL_WINDOW_API"
+			"GLFW_INCLUDE_NONE"
+		--,"SDL_WINDOW_API"
 		}
 	postbuildcommands
 		{
 			(" {MKDIR} ../bin/"..outputdir.."/Sandbox/"),
 			("{COPY} %{cfg.buildtarget.relpath} ../bin/"..outputdir.."/Sandbox/")
+			--,("{COPY} ../Sandbox/assets/ ../bin/"..outputdir.."/Sandbox/")
 		}
 
 	filter "configurations:Debug"
@@ -91,7 +91,7 @@ project "Alalba"
 	
 
 project "Sandbox"
-	
+		location "Sandbox"
 		kind "ConsoleApp"
 		language "C++"
 	
@@ -123,10 +123,14 @@ project "Sandbox"
 			buildoptions "-fpermissive"
 			defines
 			{
-				"ALALBA_PLATFORM_LINUX",
-
-				"SDL_WINDOW_API"
+				"ALALBA_PLATFORM_LINUX"
+		--,"SDL_WINDOW_API"
 			}
+			postbuildcommands
+			{
+				("{COPY} assets ../bin/"..outputdir.."/Sandbox/")
+			}
+
 		filter "configurations:Debug"
 			defines "ALALBA_DEBUG"
 			symbols "On"

@@ -1,13 +1,14 @@
 #pragma once
-#include "Alalba/Renderer/VertexBuffer.h"
+
+#include "Alalba/Renderer/IndexBuffer.h"
 
 namespace Alalba {
 
-	class ALALBA_API OpenGLVertexBuffer : public VertexBuffer
+	class ALALBA_API OpenGLIndexBuffer : public IndexBuffer
 	{
 	public:
-		OpenGLVertexBuffer(unsigned int size);
-		virtual ~OpenGLVertexBuffer();
+		OpenGLIndexBuffer(unsigned int size);
+		virtual ~OpenGLIndexBuffer();
 
 		virtual void SetData(void* buffer, unsigned int size, unsigned int offset = 0);
 		virtual void Bind() const;

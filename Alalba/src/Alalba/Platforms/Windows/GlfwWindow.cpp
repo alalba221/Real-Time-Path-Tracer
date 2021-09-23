@@ -19,6 +19,7 @@ namespace Alalba
 
 	GlfwWindow::GlfwWindow(const WindowProps& prop)
 	{
+		ALALBA_CORE_INFO("GLFW WINDOW API");
 		Init(prop);
 	}
 	GlfwWindow::~GlfwWindow()
