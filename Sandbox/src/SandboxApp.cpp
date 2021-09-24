@@ -20,7 +20,9 @@ class EditorLayer : public Alalba::Layer
 {
 public:
 	EditorLayer()
-		: Layer("Example"),m_ClearColor{0.2f,0.3f,0.8f,1.0f}
+		: Layer("Example"),
+		m_ClearColor{ 0.2f, 0.3f, 0.8f, 1.0f }, 
+		m_TriangleColor{ 0.8f, 0.2f, 0.3f, 1.0f }
 	{
 	}
 	virtual void OnAttach () override
@@ -47,6 +49,10 @@ public:
 			ALALBA_APP_TRACE("Mouse left key is pressed (poll)!");
 		Alalba::Renderer::Clear(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], m_ClearColor[3]);
 	
+		Alalba::UniformBufferDeclaration<sizeof(glm::vec4), 1> buffer;
+		buffer.Push("u_Color", m_TriangleColor);
+		m_Shader->UploadUniformBuffer(buffer);
+		
 		m_VB->Bind();
 		m_Shader->Bind();
 		m_IB->Bind();
@@ -61,6 +67,7 @@ public:
 
 		ImGui::Begin("GameLayer");
 		ImGui::ColorEdit4("Clear Color", m_ClearColor);
+		ImGui::ColorEdit4("Triangle Color", glm::value_ptr(m_TriangleColor));
 		ImGui::End();
 
 	}
