@@ -20,8 +20,7 @@
 // ---  Render API ------------------------------
 #include "Alalba/Renderer/Renderer.h"
 #include "Alalba/Renderer/FrameBuffer.h"
-#include "Alalba/Renderer/VertexBuffer.h"
-#include "Alalba/Renderer/IndexBuffer.h"
+#include "Alalba/Renderer/Buffer.h"
 #include "Alalba/Renderer/Texture.h"
 #include "Alalba/Renderer/Shader.h"
 //Entry Point

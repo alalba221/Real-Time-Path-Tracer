@@ -70,7 +70,7 @@ project "Alalba"
 			"ALALBA_PLATFORM_LINUX",
 			"ALALBA_BUILD_DLL",
 			"GLFW_INCLUDE_NONE"
-		--,"SDL_WINDOW_API"
+			,"SDL_WINDOW_API"
 		}
 	postbuildcommands
 		{
@@ -126,7 +126,7 @@ project "Sandbox"
 			defines
 			{
 				"ALALBA_PLATFORM_LINUX"
-		--,"SDL_WINDOW_API"
+				,"SDL_WINDOW_API"
 			}
 			postbuildcommands
 			{
