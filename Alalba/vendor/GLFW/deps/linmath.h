@@ -100,7 +100,7 @@ LINMATH_H_FUNC void vec4_mul_cross(vec4 r, vec4 const a, vec4 const b)
 
 LINMATH_H_FUNC void vec4_reflect(vec4 r, vec4 const v, vec4 const n)
 {
-	float p  = 2.f*vec4_mul_inner(v, n);
+	float p	= 2.f*vec4_mul_inner(v, n);
 	int i;
 	for(i=0;i<4;++i)
 		r[i] = v[i] - p*n[i];
@@ -134,8 +134,8 @@ LINMATH_H_FUNC void mat4x4_col(vec4 r, mat4x4 const M, int i)
 }
 LINMATH_H_FUNC void mat4x4_transpose(mat4x4 M, mat4x4 const N)
 {
-    // Note: if M and N are the same, the user has to
-    // explicitly make a copy of M and set it to N.
+		// Note: if M and N are the same, the user has to
+		// explicitly make a copy of M and set it to N.
 	int i, j;
 	for(j=0; j<4; ++j)
 		for(i=0; i<4; ++i)
@@ -221,10 +221,10 @@ LINMATH_H_FUNC void mat4x4_rotate(mat4x4 R, mat4x4 const M, float x, float y, fl
 		mat4x4_from_vec3_mul_outer(T, u, u);
 
 		mat4x4 S = {
-			{    0,  u[2], -u[1], 0},
-			{-u[2],     0,  u[0], 0},
-			{ u[1], -u[0],     0, 0},
-			{    0,     0,     0, 0}
+			{		0,	u[2], -u[1], 0},
+			{-u[2],		 0,	u[0], 0},
+			{ u[1], -u[0],		 0, 0},
+			{		0,		 0,		 0, 0}
 		};
 		mat4x4_scale(S, S, s);
 
@@ -249,8 +249,8 @@ LINMATH_H_FUNC void mat4x4_rotate_X(mat4x4 Q, mat4x4 const M, float angle)
 	float c = cosf(angle);
 	mat4x4 R = {
 		{1.f, 0.f, 0.f, 0.f},
-		{0.f,   c,   s, 0.f},
-		{0.f,  -s,   c, 0.f},
+		{0.f,	 c,	 s, 0.f},
+		{0.f,	-s,	 c, 0.f},
 		{0.f, 0.f, 0.f, 1.f}
 	};
 	mat4x4_mul(Q, M, R);
@@ -260,9 +260,9 @@ LINMATH_H_FUNC void mat4x4_rotate_Y(mat4x4 Q, mat4x4 const M, float angle)
 	float s = sinf(angle);
 	float c = cosf(angle);
 	mat4x4 R = {
-		{   c, 0.f,  -s, 0.f},
+		{	 c, 0.f,	-s, 0.f},
 		{ 0.f, 1.f, 0.f, 0.f},
-		{   s, 0.f,   c, 0.f},
+		{	 s, 0.f,	 c, 0.f},
 		{ 0.f, 0.f, 0.f, 1.f}
 	};
 	mat4x4_mul(Q, M, R);
@@ -272,8 +272,8 @@ LINMATH_H_FUNC void mat4x4_rotate_Z(mat4x4 Q, mat4x4 const M, float angle)
 	float s = sinf(angle);
 	float c = cosf(angle);
 	mat4x4 R = {
-		{   c,   s, 0.f, 0.f},
-		{  -s,   c, 0.f, 0.f},
+		{	 c,	 s, 0.f, 0.f},
+		{	-s,	 c, 0.f, 0.f},
 		{ 0.f, 0.f, 1.f, 0.f},
 		{ 0.f, 0.f, 0.f, 1.f}
 	};
@@ -403,12 +403,12 @@ LINMATH_H_FUNC void mat4x4_perspective(mat4x4 m, float y_fov, float aspect, floa
 }
 LINMATH_H_FUNC void mat4x4_look_at(mat4x4 m, vec3 const eye, vec3 const center, vec3 const up)
 {
-	/* Adapted from Android's OpenGL Matrix.java.                        */
+	/* Adapted from Android's OpenGL Matrix.java.												*/
 	/* See the OpenGL GLUT documentation for gluLookAt for a description */
-	/* of the algorithm. We implement it in a straightforward way:       */
+	/* of the algorithm. We implement it in a straightforward way:			 */
 
 	/* TODO: The negation of of can be spared by swapping the order of
-	 *       operands in the following cross products in the right way. */
+	 *			 operands in the following cross products in the right way. */
 	vec3 f;
 	vec3_sub(f, center, eye);	
 	vec3_norm(f, f);	
@@ -420,25 +420,25 @@ LINMATH_H_FUNC void mat4x4_look_at(mat4x4 m, vec3 const eye, vec3 const center, 
 	vec3 t;
 	vec3_mul_cross(t, s, f);
 
-	m[0][0] =  s[0];
-	m[0][1] =  t[0];
+	m[0][0] =	s[0];
+	m[0][1] =	t[0];
 	m[0][2] = -f[0];
-	m[0][3] =   0.f;
+	m[0][3] =	 0.f;
 
-	m[1][0] =  s[1];
-	m[1][1] =  t[1];
+	m[1][0] =	s[1];
+	m[1][1] =	t[1];
 	m[1][2] = -f[1];
-	m[1][3] =   0.f;
+	m[1][3] =	 0.f;
 
-	m[2][0] =  s[2];
-	m[2][1] =  t[2];
+	m[2][0] =	s[2];
+	m[2][1] =	t[2];
 	m[2][2] = -f[2];
-	m[2][3] =   0.f;
+	m[2][3] =	 0.f;
 
-	m[3][0] =  0.f;
-	m[3][1] =  0.f;
-	m[3][2] =  0.f;
-	m[3][3] =  1.f;
+	m[3][0] =	0.f;
+	m[3][1] =	0.f;
+	m[3][2] =	0.f;
+	m[3][3] =	1.f;
 
 	mat4x4_translate_in_place(m, -eye[0], -eye[1], -eye[2]);
 }
@@ -473,12 +473,12 @@ LINMATH_H_FUNC void quat_conj(quat r, quat const q)
 	r[3] = q[3];
 }
 LINMATH_H_FUNC void quat_rotate(quat r, float angle, vec3 const axis) {
-    vec3 axis_norm;
-    vec3_norm(axis_norm, axis);
-    float s = sinf(angle / 2);
-    float c = cosf(angle / 2);
-    vec3_scale(r, axis_norm, s);
-    r[3] = c;
+		vec3 axis_norm;
+		vec3_norm(axis_norm, axis);
+		float s = sinf(angle / 2);
+		float c = cosf(angle / 2);
+		vec3_scale(r, axis_norm, s);
+		r[3] = c;
 }
 LINMATH_H_FUNC void quat_mul_vec3(vec3 r, quat const q, vec3 const v)
 {
@@ -532,7 +532,7 @@ LINMATH_H_FUNC void mat4x4_from_quat(mat4x4 M, quat const q)
 
 LINMATH_H_FUNC void mat4x4o_mul_quat(mat4x4 R, mat4x4 const M, quat const q)
 {
-/*  XXX: The way this is written only works for orthogonal matrices. */
+/*	XXX: The way this is written only works for orthogonal matrices. */
 /* TODO: Take care of non-orthogonal case. */
 	quat_mul_vec3(R[0], q, M[0]);
 	quat_mul_vec3(R[1], q, M[1]);
@@ -542,7 +542,7 @@ LINMATH_H_FUNC void mat4x4o_mul_quat(mat4x4 R, mat4x4 const M, quat const q)
 	R[0][3] = M[0][3];
 	R[1][3] = M[1][3];
 	R[2][3] = M[2][3];
-	R[3][3] = M[3][3];  // typically 1.0, but here we make it general
+	R[3][3] = M[3][3];	// typically 1.0, but here we make it general
 }
 LINMATH_H_FUNC void quat_from_mat4x4(quat q, mat4x4 const M)
 {
