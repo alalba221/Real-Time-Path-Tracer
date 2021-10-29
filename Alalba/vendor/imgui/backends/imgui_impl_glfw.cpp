@@ -371,83 +371,83 @@ static void ImGui_ImplGlfw_UpdateMouseCursor()
 		ImGuiIO& io = ImGui::GetIO();
 		ImGui_ImplGlfw_Data* bd = ImGui_ImplGlfw_GetBackendData();
 		if ((io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange) || glfwGetInputMode(bd->Window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
-	      return;
+				return;
 
-    ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
-    if (imgui_cursor == ImGuiMouseCursor_None || io.MouseDrawCursor)
-    {
-        // Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
-        glfwSetInputMode(bd->Window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-    }
-    else
-    {
-        // Show OS mouse cursor
-        // FIXME-PLATFORM: Unfocused windows seems to fail changing the mouse cursor with GLFW 3.2, but 3.3 works here.
-        glfwSetCursor(bd->Window, bd->MouseCursors[imgui_cursor] ? bd->MouseCursors[imgui_cursor] : bd->MouseCursors[ImGuiMouseCursor_Arrow]);
-        glfwSetInputMode(bd->Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    }
+		ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
+		if (imgui_cursor == ImGuiMouseCursor_None || io.MouseDrawCursor)
+		{
+				// Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
+				glfwSetInputMode(bd->Window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+		}
+		else
+		{
+				// Show OS mouse cursor
+				// FIXME-PLATFORM: Unfocused windows seems to fail changing the mouse cursor with GLFW 3.2, but 3.3 works here.
+				glfwSetCursor(bd->Window, bd->MouseCursors[imgui_cursor] ? bd->MouseCursors[imgui_cursor] : bd->MouseCursors[ImGuiMouseCursor_Arrow]);
+				glfwSetInputMode(bd->Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
 }
 
 static void ImGui_ImplGlfw_UpdateGamepads()
 {
-    ImGuiIO& io = ImGui::GetIO();
-    memset(io.NavInputs, 0, sizeof(io.NavInputs));
-    if ((io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) == 0)
-        return;
+		ImGuiIO& io = ImGui::GetIO();
+		memset(io.NavInputs, 0, sizeof(io.NavInputs));
+		if ((io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) == 0)
+				return;
 
-    // Update gamepad inputs
-    #define MAP_BUTTON(NAV_NO, BUTTON_NO)       { if (buttons_count > BUTTON_NO && buttons[BUTTON_NO] == GLFW_PRESS) io.NavInputs[NAV_NO] = 1.0f; }
-    #define MAP_ANALOG(NAV_NO, AXIS_NO, V0, V1) { float v = (axes_count > AXIS_NO) ? axes[AXIS_NO] : V0; v = (v - V0) / (V1 - V0); if (v > 1.0f) v = 1.0f; if (io.NavInputs[NAV_NO] < v) io.NavInputs[NAV_NO] = v; }
-    int axes_count = 0, buttons_count = 0;
-    const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axes_count);
-    const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttons_count);
-    MAP_BUTTON(ImGuiNavInput_Activate,   0);     // Cross / A
-    MAP_BUTTON(ImGuiNavInput_Cancel,     1);     // Circle / B
-    MAP_BUTTON(ImGuiNavInput_Menu,       2);     // Square / X
-    MAP_BUTTON(ImGuiNavInput_Input,      3);     // Triangle / Y
-    MAP_BUTTON(ImGuiNavInput_DpadLeft,   13);    // D-Pad Left
-    MAP_BUTTON(ImGuiNavInput_DpadRight,  11);    // D-Pad Right
-    MAP_BUTTON(ImGuiNavInput_DpadUp,     10);    // D-Pad Up
-    MAP_BUTTON(ImGuiNavInput_DpadDown,   12);    // D-Pad Down
-    MAP_BUTTON(ImGuiNavInput_FocusPrev,  4);     // L1 / LB
-    MAP_BUTTON(ImGuiNavInput_FocusNext,  5);     // R1 / RB
-    MAP_BUTTON(ImGuiNavInput_TweakSlow,  4);     // L1 / LB
-    MAP_BUTTON(ImGuiNavInput_TweakFast,  5);     // R1 / RB
-    MAP_ANALOG(ImGuiNavInput_LStickLeft, 0,  -0.3f,  -0.9f);
-    MAP_ANALOG(ImGuiNavInput_LStickRight,0,  +0.3f,  +0.9f);
-    MAP_ANALOG(ImGuiNavInput_LStickUp,   1,  +0.3f,  +0.9f);
-    MAP_ANALOG(ImGuiNavInput_LStickDown, 1,  -0.3f,  -0.9f);
-    #undef MAP_BUTTON
-    #undef MAP_ANALOG
-    if (axes_count > 0 && buttons_count > 0)
-        io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
-    else
-        io.BackendFlags &= ~ImGuiBackendFlags_HasGamepad;
+		// Update gamepad inputs
+		#define MAP_BUTTON(NAV_NO, BUTTON_NO)			 { if (buttons_count > BUTTON_NO && buttons[BUTTON_NO] == GLFW_PRESS) io.NavInputs[NAV_NO] = 1.0f; }
+		#define MAP_ANALOG(NAV_NO, AXIS_NO, V0, V1) { float v = (axes_count > AXIS_NO) ? axes[AXIS_NO] : V0; v = (v - V0) / (V1 - V0); if (v > 1.0f) v = 1.0f; if (io.NavInputs[NAV_NO] < v) io.NavInputs[NAV_NO] = v; }
+		int axes_count = 0, buttons_count = 0;
+		const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axes_count);
+		const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttons_count);
+		MAP_BUTTON(ImGuiNavInput_Activate,	 0);		 // Cross / A
+		MAP_BUTTON(ImGuiNavInput_Cancel,		 1);		 // Circle / B
+		MAP_BUTTON(ImGuiNavInput_Menu,			 2);		 // Square / X
+		MAP_BUTTON(ImGuiNavInput_Input,			3);		 // Triangle / Y
+		MAP_BUTTON(ImGuiNavInput_DpadLeft,	 13);		// D-Pad Left
+		MAP_BUTTON(ImGuiNavInput_DpadRight,	11);		// D-Pad Right
+		MAP_BUTTON(ImGuiNavInput_DpadUp,		 10);		// D-Pad Up
+		MAP_BUTTON(ImGuiNavInput_DpadDown,	 12);		// D-Pad Down
+		MAP_BUTTON(ImGuiNavInput_FocusPrev,	4);		 // L1 / LB
+		MAP_BUTTON(ImGuiNavInput_FocusNext,	5);		 // R1 / RB
+		MAP_BUTTON(ImGuiNavInput_TweakSlow,	4);		 // L1 / LB
+		MAP_BUTTON(ImGuiNavInput_TweakFast,	5);		 // R1 / RB
+		MAP_ANALOG(ImGuiNavInput_LStickLeft, 0,	-0.3f,	-0.9f);
+		MAP_ANALOG(ImGuiNavInput_LStickRight,0,	+0.3f,	+0.9f);
+		MAP_ANALOG(ImGuiNavInput_LStickUp,	 1,	+0.3f,	+0.9f);
+		MAP_ANALOG(ImGuiNavInput_LStickDown, 1,	-0.3f,	-0.9f);
+		#undef MAP_BUTTON
+		#undef MAP_ANALOG
+		if (axes_count > 0 && buttons_count > 0)
+				io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
+		else
+				io.BackendFlags &= ~ImGuiBackendFlags_HasGamepad;
 }
 
 void ImGui_ImplGlfw_NewFrame()
 {
-    ImGuiIO& io = ImGui::GetIO();
-    ImGui_ImplGlfw_Data* bd = ImGui_ImplGlfw_GetBackendData();
-    IM_ASSERT(bd != NULL && "Did you call ImGui_ImplGlfw_InitForXXX()?");
+		ImGuiIO& io = ImGui::GetIO();
+		ImGui_ImplGlfw_Data* bd = ImGui_ImplGlfw_GetBackendData();
+		IM_ASSERT(bd != NULL && "Did you call ImGui_ImplGlfw_InitForXXX()?");
 
-    // Setup display size (every frame to accommodate for window resizing)
-    int w, h;
-    int display_w, display_h;
-    glfwGetWindowSize(bd->Window, &w, &h);
-    glfwGetFramebufferSize(bd->Window, &display_w, &display_h);
-    io.DisplaySize = ImVec2((float)w, (float)h);
-    if (w > 0 && h > 0)
-        io.DisplayFramebufferScale = ImVec2((float)display_w / w, (float)display_h / h);
+		// Setup display size (every frame to accommodate for window resizing)
+		int w, h;
+		int display_w, display_h;
+		glfwGetWindowSize(bd->Window, &w, &h);
+		glfwGetFramebufferSize(bd->Window, &display_w, &display_h);
+		io.DisplaySize = ImVec2((float)w, (float)h);
+		if (w > 0 && h > 0)
+				io.DisplayFramebufferScale = ImVec2((float)display_w / w, (float)display_h / h);
 
-    // Setup time step
-    double current_time = glfwGetTime();
-    io.DeltaTime = bd->Time > 0.0 ? (float)(current_time - bd->Time) : (float)(1.0f / 60.0f);
-    bd->Time = current_time;
+		// Setup time step
+		double current_time = glfwGetTime();
+		io.DeltaTime = bd->Time > 0.0 ? (float)(current_time - bd->Time) : (float)(1.0f / 60.0f);
+		bd->Time = current_time;
 
-    ImGui_ImplGlfw_UpdateMousePosAndButtons();
-    ImGui_ImplGlfw_UpdateMouseCursor();
+		ImGui_ImplGlfw_UpdateMousePosAndButtons();
+		ImGui_ImplGlfw_UpdateMouseCursor();
 
-    // Update game controllers (if enabled and available)
-    ImGui_ImplGlfw_UpdateGamepads();
+		// Update game controllers (if enabled and available)
+		ImGui_ImplGlfw_UpdateGamepads();
 }

@@ -6,7 +6,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER vec<3, T, Q> convertLinearSRGBToD65XYZ(vec<3, T, Q> const& ColorLinearSRGB)
 	{
 		vec<3, T, Q> const M(0.490f, 0.17697f, 0.2f);
-		vec<3, T, Q> const N(0.31f,  0.8124f, 0.01063f);
+		vec<3, T, Q> const N(0.31f,	0.8124f, 0.01063f);
 		vec<3, T, Q> const O(0.490f, 0.01f, 0.99f);
 
 		return (M * ColorLinearSRGB + N * ColorLinearSRGB + O * ColorLinearSRGB) * static_cast<T>(5.650675255693055f);

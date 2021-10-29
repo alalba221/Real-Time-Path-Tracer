@@ -7,9 +7,9 @@
 /// Enables scalar multiplication for all types
 ///
 /// Since GLSL is very strict about types, the following (often used) combinations do not work:
-///    double * vec4
-///    int * vec4
-///    vec4 / int
+///		double * vec4
+///		int * vec4
+///		vec4 / int
 /// So we'll fix that! Of course "float * vec4" should remain the same (hence the enable_if magic)
 
 #pragma once
@@ -34,7 +34,7 @@ namespace glm
 {
 	template<typename T, typename Vec>
 	using return_type_scalar_multiplication = typename std::enable_if<
-		!std::is_same<T, float>::value       // T may not be a float
+		!std::is_same<T, float>::value			 // T may not be a float
 		&& std::is_arithmetic<T>::value, Vec // But it may be an int or double (no vec3 or mat3, ...)
 	>::type;
 
