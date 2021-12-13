@@ -319,7 +319,7 @@ void _glfwPollMonitorsNS(void)
 
     for (uint32_t i = 0;  i < displayCount;  i++)
     {
-        if (CGDisplayIsAsleep(displays[i]))
+        if (CGDisplaAlalbaAsleep(displays[i]))
             continue;
 
         const uint32_t unitNumber = CGDisplayUnitNumber(displays[i]);

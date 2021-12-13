@@ -6,7 +6,7 @@
 
 namespace Alalba {
 
-	//Input* Input::s_Instance = new GlfwInput();
+	Input* Input::s_Instance = new GlfwInput();
 
 	bool GlfwInput::IsKeyPressedImpl(int keycode)
 	{

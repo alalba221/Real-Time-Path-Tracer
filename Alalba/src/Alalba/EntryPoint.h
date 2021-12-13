@@ -1,5 +1,5 @@
 #pragma once
-#ifdef ALALBA_PLATFORM_LINUX
+#ifdef ALALBA_PLATFORM_WINDOWS
 extern Alalba::Application* Alalba::CreateApplication();
 int main(int argc, char** argv){
 

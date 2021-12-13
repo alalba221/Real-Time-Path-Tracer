@@ -6,33 +6,32 @@ workspace "Alalba"
 		"Release",
 		"Dist"
 	}
+	
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-
 
 --Include directories relatice to root folder (solution directory)
 IncludeDir = {}
 IncludeDir["GLFW"] = "Alalba/vendor/GLFW/include"
 IncludeDir["Glad"] = "Alalba/vendor/Glad/include"
-IncludeDir["spdlog"] = "Alalba/vendor/spdlog/include"
-IncludeDir["imgui"] = "Alalba/vendor/imgui"
-IncludeDir["SDL"] = "Alalba/vendor/SDL"
+IncludeDir["ImGui"] = "Alalba/vendor/imgui"
 IncludeDir["glm"] = "Alalba/vendor/glm"
---startproject "Sandbox"
+startproject "Sandbox"
+
 group"Dependencies"
 	include "Alalba/vendor/GLFW"
 	include "Alalba/vendor/Glad"
 	include "Alalba/vendor/imgui"
-	--include "Alalba/vendor/SDL"
 group""
-
 
 project "Alalba"
 	location "Alalba"
-	kind "SharedLib"
+	kind "StaticLib"
 	language "C++"
+	cppdialect "C++17"
+	staticruntime "on"
 
-	targetdir ("bin/"..outputdir.."/%{prj.name}")
-	objdir ("bin-int/"..outputdir.."/%{prj.name}")
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
 	pchheader "alalbapch.h"
 	pchsource "Alalba/src/alalbapch.cpp"
@@ -40,108 +39,108 @@ project "Alalba"
 	files
 	{
 		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp"
+		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/vendor/glm/glm/**.hpp",
+		"%{prj.name}/vendor/glm/glm/**.inl"
+	}
+	defines
+	{
+		"ALALBA_PLATFORM_WINDOWS",
+		"_CRT_SECURE_NO_WARNINGS"
 	}
 	includedirs
 	{
 		"%{prj.name}/src",
-		"%{IncludeDir.spdlog}",
+		"%{prj.name}/vendor/spdlog/include",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.GLFW}",
-		"%{IncludeDir.imgui}",
+		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}"
+		--"%{prj.name}/vendor/stb/include"
+		--"%{prj.name}/vendor/assimp/include"
 	}
-	links
-	{
-		"Glad",
+	links 
+	{ 
 		"GLFW",
-		"dl",
-		"pthread",
+		"Glad",
 		"ImGui",
-		"SDL2"
+		"opengl32.lib"
 	}
-	filter "system:linux"
-		cppdialect "C++17"
-		staticruntime "On"
+
+	filter "system:windows"
+		
 		systemversion "latest"
-		buildoptions "-fpermissive"
+
 		defines
 		{
-			"ALALBA_PLATFORM_LINUX",
+			"ALALBA_PLATFORM_WINDOWS",
 			"ALALBA_BUILD_DLL",
 			"GLFW_INCLUDE_NONE"
-			,"SDL_WINDOW_API"
-		}
-	postbuildcommands
-		{
-			(" {MKDIR} ../bin/"..outputdir.."/Sandbox/"),
-			("{COPY} %{cfg.buildtarget.relpath} ../bin/"..outputdir.."/Sandbox/")
-			--,("{COPY} ../Sandbox/assets/ ../bin/"..outputdir.."/Sandbox/")
 		}
 
 	filter "configurations:Debug"
 		defines "ALALBA_DEBUG"
-		symbols "On"
-		
+		runtime "Debug"
+		symbols "on"
 	filter "configurations:Release"
 		defines "ALALBA_RELEASE"
-		optimize "On"
+		runtime "Release"
+		optimize "on"
 	filter "configurations:Dist"
 		defines "ALALBA_Dist"
-		optimize "On"
-	
+		runtime "Release"
+		optimize "on"
+
 
 project "Sandbox"
-		location "Sandbox"
-		kind "ConsoleApp"
-		language "C++"
-	
-		targetdir ("bin/"..outputdir.."/%{prj.name}")
-		objdir ("bin-int/"..outputdir.."/%{prj.name}")
-		
-		files
-		{
-			"%{prj.name}/src/**.h",
-			"%{prj.name}/src/**.cpp",
-			
-		}
-		includedirs
-		{
-			"Alalba/src",
-			"%{IncludeDir.spdlog}",
-			"Alalba/vendor",
-			"%{IncludeDir.glm}"
-		}
-		links
-		{
-			"Alalba",
-			"ImGui",
-			"SDL2"
-		}
-		filter "system:linux"
-			cppdialect "C++17"
-			staticruntime "On"
-			systemversion "latest"
-			buildoptions "-fpermissive"
-			defines
-			{
-				"ALALBA_PLATFORM_LINUX"
-				,"SDL_WINDOW_API"
-			}
-			postbuildcommands
-			{
-				("{COPY} assets ../bin/"..outputdir.."/Sandbox/")
-			}
+	location "Sandbox"
+	kind "ConsoleApp"
+	staticruntime "on"
+	language "C++"
+	cppdialect "C++17"
 
-		filter "configurations:Debug"
-			defines "ALALBA_DEBUG"
-			symbols "On"
-			
-		filter "configurations:Release"
-			defines "ALALBA_RELEASE"
-			optimize "On"
-		filter "configurations:Dist"
-			defines "ALALBA_Dist"
-			optimize "On"
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	
-	
+	files
+	{
+		"%{prj.name}/src/**.h",
+		"%{prj.name}/src/**.cpp"
+	}
+	defines
+	{
+		"ALALBA_PLATFORM_WINDOWS"
+	}
+	includedirs
+	{
+		"Alalba/vendor/spdlog/include",
+		"Alalba/src",
+		"Alalba/vendor",
+		"%{IncludeDir.glm}"
+
+	}
+	links
+	{
+		"Alalba"
+		-- "Alalba/vendor/assimp/win64/assimp.lib"
+	}
+	filter "system:windows"
+		
+		systemversion "latest"
+
+		defines
+		{
+			"ALALBA_PLATFORM_WINDOWS"
+		}
+	filter "configurations:Debug"
+		defines "ALALBA_DEBUG"
+		runtime "Debug"
+		symbols "on"
+	filter "configurations:Release"
+		defines "ALALBA_RELEASE"
+		runtime "Release"
+		optimize "on"
+	filter "configurations:Dist"
+		defines "ALALBA_Dist"
+		runtime "Release"
+		optimize "on"
