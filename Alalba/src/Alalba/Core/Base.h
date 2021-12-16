@@ -12,15 +12,18 @@
 	#endif
 
 #else
-#error ALALBA only support Windows!
+	#error ALALBA only support Windows!
+#endif
+#ifdef ALALBA_DEBUG
+	#define ALALBA_ENABLE_ASSERTS
 #endif
 
 #ifdef ALALBA_ENABLE_ASSERTS
-#define ALALBA_APP_ASSERT(x,...){if(!x){ALALBA_APP_ERROR("Assertion Failed :{0}",__VA_ARGS__);__debugbreak();}} 
-#define ALALBA_CORE_ASSERT(x,...){if(!x){ALALBA_CORE_ERROR("Assertion Failed :{0}",__VA_ARGS__);__debugbreak();}} 
+	#define ALALBA_APP_ASSERT(x,...){if(!(x)){ALALBA_APP_ERROR("Assertion Failed :{0}",__VA_ARGS__);__debugbreak();}} 
+	#define ALALBA_CORE_ASSERT(x,...){if(!(x)){ALALBA_CORE_ERROR("Assertion Failed :{0}",__VA_ARGS__);__debugbreak();}} 
 #else
-#define ALALBA_APP_ASSERT(x,...)
-#define ALALBA_CORE_ASSERT(x,...)
+	#define ALALBA_APP_ASSERT(x,...)
+	#define ALALBA_CORE_ASSERT(x,...)
 #endif // ALALBA_ENABLE_ASSERTS
 
 

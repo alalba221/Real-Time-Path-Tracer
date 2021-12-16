@@ -52,13 +52,14 @@
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsClassic();
 
     // Setup Platform/Renderer backends
-    ImGui_ImplOSX_Init();
+    ImGui_ImplOSX_Init(self);
     ImGui_ImplOpenGL2_Init();
 
     // Load Fonts
@@ -146,12 +147,9 @@
         animationTimer = [NSTimer scheduledTimerWithTimeInterval:0.017 target:self selector:@selector(animationTimerFired:) userInfo:nil repeats:YES];
 }
 
--(void)reshape                              { [[self openGLContext] update]; [self updateAndDrawDemoView]; }
+-(void)reshape                              { [super reshape]; [[self openGLContext] update]; [self updateAndDrawDemoView]; }
 -(void)drawRect:(NSRect)bounds              { [self updateAndDrawDemoView]; }
 -(void)animationTimerFired:(NSTimer*)timer  { [self setNeedsDisplay:YES]; }
--(BOOL)acceptsFirstResponder                { return (YES); }
--(BOOL)becomeFirstResponder                 { return (YES); }
--(BOOL)resignFirstResponder                 { return (YES); }
 -(void)dealloc                              { animationTimer = nil; }
 
 //-----------------------------------------------------------------------------------
