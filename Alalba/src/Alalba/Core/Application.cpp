@@ -1,9 +1,15 @@
 #include "alalbapch.h"
 #include "Application.h"
 #include "Alalba/Core/Events/ApplicationEvent.h"
-#include "Alalba/Core/Log.h"
+
 #include "Alalba/Renderer/Renderer.h"
 #include <glad/glad.h>
+#include <imgui.h>
+//
+//#define GLFW_EXPOSE_NATIVE_WIN32
+//#include <GLFW/glfw3native.h>
+//#include <Windows.h>
+
 namespace Alalba{
   #define BIND_ENVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 
@@ -51,6 +57,13 @@ namespace Alalba{
 	void Application::RenderImGui()
 	{
 		m_ImGuiLayer->Begin();
+		ImGui::Begin("Renderer");
+		auto& caps = RendererAPI::GetCapabilities();
+		ImGui::Text("Vendor: %s", caps.Vendor.c_str());
+		ImGui::Text("Renderer: %s", caps.Renderer.c_str());
+		ImGui::Text("Version: %s", caps.Version.c_str());
+		ImGui::End();
+
 		for (Layer* layer : m_LayerStack)
 			layer->OnImGuiRender();
 

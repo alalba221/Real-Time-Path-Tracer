@@ -9,7 +9,7 @@ workspace "Alalba"
 	
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
---Include directories relatice to root folder (solution directory)
+--Include directories relatice to the script current running
 IncludeDir = {}
 IncludeDir["GLFW"] = "Alalba/vendor/GLFW/include"
 IncludeDir["Glad"] = "Alalba/vendor/Glad/include"
@@ -39,8 +39,8 @@ project "Alalba"
 	files
 	{
 		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
+		"%{prj.name}/src/**.cpp",
 		"%{prj.name}/vendor/glm/glm/**.inl"
 	}
 	defines
@@ -55,9 +55,9 @@ project "Alalba"
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.glm}"
-		--"%{prj.name}/vendor/stb/include"
-		--"%{prj.name}/vendor/assimp/include"
+		"%{IncludeDir.glm}",
+		"%{prj.location}/vendor/stb/include",
+		"%{prj.location}/vendor/assimp/include"
 	}
 	links 
 	{ 
@@ -77,7 +77,12 @@ project "Alalba"
 			"ALALBA_BUILD_DLL",
 			"GLFW_INCLUDE_NONE"
 		}
-
+		-- Directories relatice to project folder
+		postbuildcommands
+    {
+			--("{COPY} %{cfg.buildtarget.relpath} ../bin/"..outputdir.."/Sandbox")
+			("{COPY} vendor/assimp/win64/assimp.dll  ../bin/" ..outputdir .. "/Sandbox")
+    }
 	filter "configurations:Debug"
 		defines "ALALBA_DEBUG"
 		runtime "Debug"
@@ -90,7 +95,7 @@ project "Alalba"
 		defines "ALALBA_Dist"
 		runtime "Release"
 		optimize "on"
-
+	
 
 project "Sandbox"
 	location "Sandbox"
@@ -121,9 +126,10 @@ project "Sandbox"
 	}
 	links
 	{
-		"Alalba"
-		-- "Alalba/vendor/assimp/win64/assimp.lib"
+		"Alalba",
+		"Alalba/vendor/assimp/win64/assimp.lib"
 	}
+	
 	filter "system:windows"
 		
 		systemversion "latest"

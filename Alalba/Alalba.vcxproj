@@ -77,7 +77,7 @@
       <PrecompiledHeaderFile>alalbapch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;ALALBA_PLATFORM_WINDOWS;ALALBA_BUILD_DLL;GLFW_INCLUDE_NONE;ALALBA_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\Glad\include;vendor\GLFW\include;vendor\imgui;vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\Glad\include;vendor\GLFW\include;vendor\imgui;vendor\glm;vendor\stb\include;vendor\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -90,6 +90,9 @@
     <Lib>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
+    <PostBuildEvent>
+      <Command>IF EXIST vendor\assimp\win64\assimp.dll\ (xcopy /Q /E /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Debug-windows-x86_64\Sandbox &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -97,7 +100,7 @@
       <PrecompiledHeaderFile>alalbapch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;ALALBA_PLATFORM_WINDOWS;ALALBA_BUILD_DLL;GLFW_INCLUDE_NONE;ALALBA_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\Glad\include;vendor\GLFW\include;vendor\imgui;vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\Glad\include;vendor\GLFW\include;vendor\imgui;vendor\glm;vendor\stb\include;vendor\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -114,6 +117,9 @@
     <Lib>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
+    <PostBuildEvent>
+      <Command>IF EXIST vendor\assimp\win64\assimp.dll\ (xcopy /Q /E /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Release-windows-x86_64\Sandbox &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
     <ClCompile>
@@ -121,7 +127,7 @@
       <PrecompiledHeaderFile>alalbapch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;ALALBA_PLATFORM_WINDOWS;ALALBA_BUILD_DLL;GLFW_INCLUDE_NONE;ALALBA_Dist;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\Glad\include;vendor\GLFW\include;vendor\imgui;vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\Glad\include;vendor\GLFW\include;vendor\imgui;vendor\glm;vendor\stb\include;vendor\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -138,6 +144,9 @@
     <Lib>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
+    <PostBuildEvent>
+      <Command>IF EXIST vendor\assimp\win64\assimp.dll\ (xcopy /Q /E /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Dist-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Dist-windows-x86_64\Sandbox &gt; nul)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\Alalba.h" />
@@ -163,7 +172,9 @@
     <ClInclude Include="src\Alalba\Platforms\Windows\GlfwInput.h" />
     <ClInclude Include="src\Alalba\Platforms\Windows\GlfwWindow.h" />
     <ClInclude Include="src\Alalba\Renderer\Buffer.h" />
-    <ClInclude Include="src\Alalba\Renderer\FrameBuffer.h" />
+    <ClInclude Include="src\Alalba\Renderer\Camera.h" />
+    <ClInclude Include="src\Alalba\Renderer\Framebuffer.h" />
+    <ClInclude Include="src\Alalba\Renderer\Mesh.h" />
     <ClInclude Include="src\Alalba\Renderer\RenderCommand.h" />
     <ClInclude Include="src\Alalba\Renderer\RenderCommandQueue.h" />
     <ClInclude Include="src\Alalba\Renderer\Renderer.h" />
@@ -602,6 +613,9 @@
     <ClCompile Include="src\Alalba\Platforms\Windows\GlfwInput.cpp" />
     <ClCompile Include="src\Alalba\Platforms\Windows\GlfwWindow.cpp" />
     <ClCompile Include="src\Alalba\Renderer\Buffer.cpp" />
+    <ClCompile Include="src\Alalba\Renderer\Camera.cpp" />
+    <ClCompile Include="src\Alalba\Renderer\Framebuffer.cpp" />
+    <ClCompile Include="src\Alalba\Renderer\Mesh.cpp" />
     <ClCompile Include="src\Alalba\Renderer\RenderCommand.cpp" />
     <ClCompile Include="src\Alalba\Renderer\RenderCommandQueue.cpp" />
     <ClCompile Include="src\Alalba\Renderer\Renderer.cpp" />

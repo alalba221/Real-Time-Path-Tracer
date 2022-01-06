@@ -22,6 +22,8 @@
 #include "Alalba/Renderer/FrameBuffer.h"
 #include "Alalba/Renderer/Buffer.h"
 #include "Alalba/Renderer/Texture.h"
+#include "Alalba/Renderer/Mesh.h"
 #include "Alalba/Renderer/Shader.h"
+#include "Alalba/Renderer/Camera.h"
 //Entry Point
 #include "Alalba/EntryPoint.h"

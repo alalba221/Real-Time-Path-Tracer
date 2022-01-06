@@ -22,41 +22,65 @@ public:
 	EditorLayer()
 		: Layer("Example"),
 		m_ClearColor{ 0.2f, 0.3f, 0.8f, 1.0f }, 
-		m_TriangleColor{ 0.8f, 0.2f, 0.3f, 1.0f }
+		m_TriangleColor{ 0.8f, 0.2f, 0.3f, 1.0f },
+		m_Camera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 10000.0f))
 	{
 	}
 	virtual void OnAttach () override
 	{
 		static float vertices[] = {
-			-0.5f, -0.5f, 0.0f,
-			 0.5f, -0.5f, 0.0f,
-			 0.0f,  0.5f, 0.0f
+			 -0.500000,  -0.500000,	 0.500000,0,0,
+			  0.500000,  -0.500000,	 0.500000,0,0,
+			 -0.500000,		0.500000,	 0.500000,0,0,
+			  0.500000,   0.500000,	 0.500000,0,0,
+			 -0.500000,   0.500000,	-0.500000,0,0,
+			  0.500000,   0.500000, -0.500000,0,0,
+			 -0.500000,  -0.500000, -0.500000,0,0,
+			  0.500000,  -0.500000, -0.500000,0,0 
 		};
 
 		static unsigned int indices[] = {
-			0, 1, 2
+			 0, 1, 2,
+			 2, 1, 3,
+			 2, 3, 4,
+			 4, 3, 5,
+			 4, 5, 6,
+			 6, 5, 7,
+			 6, 7, 0,
+			 0, 7, 1,
+			 1, 7, 3,
+			 3, 7, 5,
+			 6, 0, 4,
+			 4, 0, 2
 		};
 		m_VB = std::unique_ptr<Alalba::VertexBuffer>(Alalba::VertexBuffer::Create());
 		m_VB->SetData(vertices, sizeof(vertices));
 
 		m_IB = std::unique_ptr<Alalba::IndexBuffer>(Alalba::IndexBuffer::Create());
 		m_IB->SetData(indices, sizeof(indices));
-		m_Shader.reset(Alalba::Shader::Create("assets/shaders/shader.glsl"));
+
+		m_Mesh.reset(new Alalba::Mesh("assets/models/cube.obj"));
+		m_SimplePBRShader.reset(Alalba::Shader::Create("assets/shaders/shader.glsl"));
 	}
 	void OnUpdate() override
 	{
-		if (Alalba::Input::IsMouseButtonPressed(ALALBA_MOUSE_BUTTON_LEFT))
-			ALALBA_APP_TRACE("Mouse left key is pressed (poll)!");
+		m_Camera.Update();
+		auto viewProjection = m_Camera.GetProjectionMatrix() * m_Camera.GetViewMatrix();
+
 		Alalba::Renderer::Clear(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], m_ClearColor[3]);
 	
-		Alalba::UniformBufferDeclaration<sizeof(glm::vec4), 1> buffer;
-		buffer.Push("u_Color", m_TriangleColor);
-		m_Shader->UploadUniformBuffer(buffer);
+		Alalba::UniformBufferDeclaration<sizeof(glm::mat4) * 2+sizeof(glm::vec4) *1, 3> simplePbrShaderUB;
+		simplePbrShaderUB.Push("u_Color", m_TriangleColor);
+		simplePbrShaderUB.Push("u_ViewProjectionMatrix", viewProjection);
+		simplePbrShaderUB.Push("u_ModelMatrix", glm::mat4(1.0f));
+
+		m_SimplePBRShader->UploadUniformBuffer(simplePbrShaderUB);
 		
 		m_VB->Bind();
-		m_Shader->Bind();
+		m_SimplePBRShader->Bind();
 		m_IB->Bind();
-		Alalba::Renderer::DrawIndexed(3);
+		//Alalba::Renderer::DrawIndexed(36);
+		m_Mesh->Render();
 	}
 
 	virtual void OnImGuiRender() override
@@ -84,11 +108,16 @@ public:
 		}
 	}
 	private: 
+		
+		Alalba::Camera m_Camera;
 		float m_ClearColor[4];
 		std::unique_ptr<Alalba::VertexBuffer> m_VB;
 		std::unique_ptr<Alalba::IndexBuffer> m_IB;
-		std::unique_ptr<Alalba::Shader> m_Shader;
+		std::unique_ptr<Alalba::Shader> m_SimplePBRShader;
 		glm::vec4 m_TriangleColor;
+
+		std::unique_ptr<Alalba::Mesh> m_Mesh;
+
 };
 
 class Sandbox : public Alalba::Application{

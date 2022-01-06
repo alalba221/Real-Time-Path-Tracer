@@ -30,9 +30,9 @@ namespace Alalba {
 	void Renderer::SetClearColor(float r, float g, float b, float a)
 	{
 	}
-	void Renderer::DrawIndexed(unsigned int count)
+	void Renderer::DrawIndexed(unsigned int count, bool depthTest)
 	{
-		ALALBA_RENDER_1(count, {
+		ALALBA_RENDER_2(count, depthTest,{
 			RendererAPI::DrawIndexed(count);
 		});
 	}
