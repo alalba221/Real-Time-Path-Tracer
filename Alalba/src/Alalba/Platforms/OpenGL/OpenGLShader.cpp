@@ -154,19 +154,19 @@ namespace Alalba {
 
 		m_RendererID = program;
 
-		//// Bind default texture unit
-		//UploadUniformInt("u_Texture", 0);
+		// Bind default texture unit
+		UploadUniformInt("u_Texture", 0);
 
-		//// PBR shader textures
-		//UploadUniformInt("u_AlbedoTexture", 1);
-		//UploadUniformInt("u_NormalTexture", 2);
-		//UploadUniformInt("u_MetalnessTexture", 3);
-		//UploadUniformInt("u_RoughnessTexture", 4);
+		// PBR shader textures
+		UploadUniformInt("u_AlbedoTexture", 1);
+		UploadUniformInt("u_NormalTexture", 2);
+		UploadUniformInt("u_MetalnessTexture", 3);
+		UploadUniformInt("u_RoughnessTexture", 4);
 
-		//UploadUniformInt("u_EnvRadianceTex", 10);
-		//UploadUniformInt("u_EnvIrradianceTex", 11);
+		UploadUniformInt("u_EnvRadianceTex", 10);
+		UploadUniformInt("u_EnvIrradianceTex", 11);
 
-		//UploadUniformInt("u_BRDFLUTTexture", 15);
+		UploadUniformInt("u_BRDFLUTTexture", 15);
 
 	}
 
@@ -241,7 +241,7 @@ namespace Alalba {
 		if (location != -1)
 			glUniform1i(location, value);
 		else
-			ALALBA_LOG_UNIFORM("Uniform '{0}' not found!", name);
+			ALALBA_LOG_UNIFORM("Uniform '{0}' not found from OpenGLshader.cpp!", name);
 	}
 
 	void OpenGLShader::UploadUniformFloat(const std::string& name, float value)
@@ -251,7 +251,7 @@ namespace Alalba {
 		if (location != -1)
 			glUniform1f(location, value);
 		else
-			ALALBA_LOG_UNIFORM("Uniform '{0}' not found!", name);
+			ALALBA_LOG_UNIFORM("Uniform '{0}' not found from OpenGLshader.cpp!", name);
 
 	}
 	void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& values)
@@ -261,7 +261,7 @@ namespace Alalba {
 		if (location != -1)
 			glUniform3f(location, values.x, values.y, values.z);
 		else
-			ALALBA_LOG_UNIFORM("Uniform '{0}' not found!", name);
+			ALALBA_LOG_UNIFORM("Uniform '{0}' not found from OpenGLshader.cpp!", name);
 	}
 
 	void OpenGLShader::UploadUniformFloat4(const std::string& name, const glm::vec4& values)
@@ -271,7 +271,7 @@ namespace Alalba {
 		if (location != -1)
 			glUniform4f(location, values.x, values.y, values.z, values.w);
 		else
-			ALALBA_LOG_UNIFORM("Uniform '{0}' not found!", name);
+			ALALBA_LOG_UNIFORM("Uniform '{0}' not found from OpenGLshader.cpp!", name);
 
 	}
 	void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& values)

@@ -27,9 +27,9 @@ namespace Alalba
 	void OpenGLVertexBuffer::SetData(void* buffer, unsigned int size, unsigned int offset)
 	{
 		ALALBA_RENDER_S3(buffer, size, offset, {
-		/*	glBindBuffer(GL_ARRAY_BUFFER, self->m_RendererID);
-			glBufferData(GL_ARRAY_BUFFER, size, buffer, GL_STATIC_DRAW);*/
-			glNamedBufferStorage(self->m_RendererID, size, buffer, GL_DYNAMIC_STORAGE_BIT);
+			glBindBuffer(GL_ARRAY_BUFFER, self->m_RendererID);
+			glBufferData(GL_ARRAY_BUFFER, size, buffer, GL_STATIC_DRAW);
+			//glNamedBufferStorage(self->m_RendererID, size, buffer, GL_DYNAMIC_STORAGE_BIT);
 		});
   }
 

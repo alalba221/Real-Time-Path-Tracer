@@ -28,6 +28,9 @@
     <Filter Include="src\Alalba\Renderer">
       <UniqueIdentifier>{3F2A80ED-AB8B-5DFB-34F9-A3ADA05994BA}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Alalba\Vendor">
+      <UniqueIdentifier>{96EE16FD-0205-1593-4B7C-A0B4B7D1E51A}</UniqueIdentifier>
+    </Filter>
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
     </Filter>
@@ -1462,6 +1465,9 @@
     </ClCompile>
     <ClCompile Include="src\Alalba\Renderer\Texture.cpp">
       <Filter>src\Alalba\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Alalba\Vendor\stb_image.cpp">
+      <Filter>src\Alalba\Vendor</Filter>
     </ClCompile>
     <ClCompile Include="src\alalbapch.cpp">
       <Filter>src</Filter>

@@ -621,6 +621,7 @@
     <ClCompile Include="src\Alalba\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Alalba\Renderer\Shader.cpp" />
     <ClCompile Include="src\Alalba\Renderer\Texture.cpp" />
+    <ClCompile Include="src\Alalba\Vendor\stb_image.cpp" />
     <ClCompile Include="src\alalbapch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>

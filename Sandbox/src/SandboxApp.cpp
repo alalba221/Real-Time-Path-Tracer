@@ -28,7 +28,7 @@ public:
 	}
 	virtual void OnAttach () override
 	{
-		static float vertices[] = {
+	/*	static float vertices[] = {
 			 -0.500000,  -0.500000,	 0.500000,0,0,
 			  0.500000,  -0.500000,	 0.500000,0,0,
 			 -0.500000,		0.500000,	 0.500000,0,0,
@@ -57,9 +57,10 @@ public:
 		m_VB->SetData(vertices, sizeof(vertices));
 
 		m_IB = std::unique_ptr<Alalba::IndexBuffer>(Alalba::IndexBuffer::Create());
-		m_IB->SetData(indices, sizeof(indices));
+		m_IB->SetData(indices, sizeof(indices));*/
 
-		m_Mesh.reset(new Alalba::Mesh("assets/models/cube.obj"));
+		m_BRDFLUT.reset(Alalba::Texture2D::Create("assets/textures/cerberus/cerberus_A.png"));
+		m_Mesh.reset(new Alalba::Mesh("assets/meshes/cerberus.fbx"));
 		m_SimplePBRShader.reset(Alalba::Shader::Create("assets/shaders/shader.glsl"));
 	}
 	void OnUpdate() override
@@ -76,9 +77,10 @@ public:
 
 		m_SimplePBRShader->UploadUniformBuffer(simplePbrShaderUB);
 		
-		m_VB->Bind();
+		//m_VB->Bind();
 		m_SimplePBRShader->Bind();
-		m_IB->Bind();
+		m_BRDFLUT->Bind(0);
+		/*m_IB->Bind();*/
 		//Alalba::Renderer::DrawIndexed(36);
 		m_Mesh->Render();
 	}
@@ -116,6 +118,7 @@ public:
 		std::unique_ptr<Alalba::Shader> m_SimplePBRShader;
 		glm::vec4 m_TriangleColor;
 
+		std::unique_ptr<Alalba::Texture2D> m_BRDFLUT;
 		std::unique_ptr<Alalba::Mesh> m_Mesh;
 
 };
