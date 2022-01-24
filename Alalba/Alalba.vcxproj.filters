@@ -126,7 +126,7 @@
     <ClInclude Include="src\Alalba\Renderer\Camera.h">
       <Filter>src\Alalba\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="src\Alalba\Renderer\Framebuffer.h">
+    <ClInclude Include="src\Alalba\Renderer\FrameBuffer.h">
       <Filter>src\Alalba\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Alalba\Renderer\Mesh.h">
@@ -1445,7 +1445,7 @@
     <ClCompile Include="src\Alalba\Renderer\Camera.cpp">
       <Filter>src\Alalba\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\Alalba\Renderer\Framebuffer.cpp">
+    <ClCompile Include="src\Alalba\Renderer\FrameBuffer.cpp">
       <Filter>src\Alalba\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Alalba\Renderer\Mesh.cpp">

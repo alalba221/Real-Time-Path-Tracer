@@ -162,6 +162,7 @@ namespace Alalba {
 		UploadUniformInt("u_NormalTexture", 2);
 		UploadUniformInt("u_MetalnessTexture", 3);
 		UploadUniformInt("u_RoughnessTexture", 4);
+		UploadUniformInt("u_AOTexture", 5);
 
 		UploadUniformInt("u_EnvRadianceTex", 10);
 		UploadUniformInt("u_EnvIrradianceTex", 11);

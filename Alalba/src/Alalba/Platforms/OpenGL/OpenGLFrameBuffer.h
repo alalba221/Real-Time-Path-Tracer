@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Alalba/Renderer/Framebuffer.h"
+#include "Alalba/Renderer/FrameBuffer.h"
 
 namespace Alalba {
 
-	class OpenGLFramebuffer : public Framebuffer
+	class OpenGLFrameBuffer : public FrameBuffer
 	{
 	public:
-		OpenGLFramebuffer(uint32_t width, uint32_t height, FramebufferFormat format);
-		virtual ~OpenGLFramebuffer();
+		OpenGLFrameBuffer(uint32_t width, uint32_t height, FrameBufferFormat format);
+		virtual ~OpenGLFrameBuffer();
 
 		virtual void Resize(uint32_t width, uint32_t height) override;
 
@@ -23,11 +23,11 @@ namespace Alalba {
 
 		virtual uint32_t GetWidth() const { return m_Width; }
 		virtual uint32_t GetHeight() const { return m_Height; }
-		virtual FramebufferFormat GetFormat() const { return m_Format; }
+		virtual FrameBufferFormat GetFormat() const { return m_Format; }
 	private:
 		RendererID m_RendererID = 0;
 		uint32_t m_Width, m_Height;
-		FramebufferFormat m_Format;
+		FrameBufferFormat m_Format;
 
 		RendererID m_ColorAttachment, m_DepthAttachment;
 	};

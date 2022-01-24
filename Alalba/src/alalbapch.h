@@ -1,4 +1,7 @@
 #pragma once
+#ifdef ALALBA_PLATFORM_WINDOWS
+#include<Windows.h>
+#endif // ALALBA_PLATFORM_WINDOWS
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -14,6 +17,3 @@
 #include <cstring>
 
 #include "Alalba/Core/Log.h"
-#ifdef ALALBA_PLATFORM_WINDOWS
-	#include<Windows.h>
-#endif // ALALBA_PLATFORM_WINDOWS

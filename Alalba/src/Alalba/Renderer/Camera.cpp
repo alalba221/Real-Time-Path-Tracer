@@ -21,17 +21,15 @@ namespace Alalba {
 		m_RotationSpeed = 0.002f;
 		m_ZoomSpeed = 0.2f;
 
-		m_Position = { 0, 0, -3 };
-		m_Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+		m_Position = { -100, 100, 100 };
+		m_Rotation = glm::vec3(90.0f, 0.0f, 0.0f);
 
 		m_FocalPoint = glm::vec3(0.0f);
 		m_Distance = glm::distance(m_Position, m_FocalPoint);
 
-	/*	m_Yaw = 3.0f * (float)M_PI / 4.0f;
-		m_Pitch = M_PI / 4.0f;*/
+		m_Yaw = 3.0f * (float)M_PI / 4.0f;
+		m_Pitch = M_PI / 4.0f;
 
-		m_Yaw = 0;
-		m_Pitch = 0;
 	}
 
 	void Camera::Focus()
@@ -60,6 +58,7 @@ namespace Alalba {
 		m_Rotation = glm::eulerAngles(orientation) * (180.0f / (float)M_PI);
 		
 		m_ViewMatrix = glm::toMat4(glm::conjugate(orientation)) * glm::translate(glm::mat4(1.0f), -m_Position);
+		// T*R*S
 		//m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(orientation);
 		//m_ViewMatrix = glm::inverse(m_ViewMatrix);
 

@@ -4,19 +4,19 @@
 
 namespace Alalba {
 
-	enum class FramebufferFormat
+	enum class FrameBufferFormat
 	{
 		None = 0,
 		RGBA8 = 1,
 		RGBA16F = 2
 	};
 
-	class Framebuffer
+	class FrameBuffer
 	{
 	public:
-		static Framebuffer* Create(uint32_t width, uint32_t height, FramebufferFormat format);
+		static FrameBuffer* Create(uint32_t width, uint32_t height, FrameBufferFormat format);
 
-		virtual ~Framebuffer() {}
+		virtual ~FrameBuffer() {}
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
@@ -29,22 +29,22 @@ namespace Alalba {
 		virtual RendererID GetDepthAttachmentRendererID() const = 0;
 	};
 
-	class FramebufferPool final
+	class FrameBufferPool final
 	{
 	public:
-		FramebufferPool(uint32_t maxFBs = 32);
-		~FramebufferPool();
+		FrameBufferPool(uint32_t maxFBs = 32);
+		~FrameBufferPool();
 
-		std::weak_ptr<Framebuffer> AllocateBuffer();
-		void Add(Framebuffer* framebuffer);
+		std::weak_ptr<FrameBuffer> AllocateBuffer();
+		void Add(FrameBuffer* frameBuffer);
 
-		const std::vector<Framebuffer*>& GetAll() const { return m_Pool; }
+		const std::vector<FrameBuffer*>& GetAll() const { return m_Pool; }
 
-		inline static FramebufferPool* GetGlobal() { return s_Instance; }
+		inline static FrameBufferPool* GetGlobal() { return s_Instance; }
 	private:
-		std::vector<Framebuffer*> m_Pool;
+		std::vector<FrameBuffer*> m_Pool;
 
-		static FramebufferPool* s_Instance;
+		static FrameBufferPool* s_Instance;
 	};
 
 }

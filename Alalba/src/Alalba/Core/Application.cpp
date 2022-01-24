@@ -3,12 +3,17 @@
 #include "Alalba/Core/Events/ApplicationEvent.h"
 
 #include "Alalba/Renderer/Renderer.h"
+#include "Alalba/Renderer/Framebuffer.h"
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <imgui.h>
 //
 //#define GLFW_EXPOSE_NATIVE_WIN32
 //#include <GLFW/glfw3native.h>
 //#include <Windows.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+#include <Windows.h>
 
 namespace Alalba{
   #define BIND_ENVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
@@ -73,7 +78,13 @@ namespace Alalba{
 
 	bool Application::OnWindowResize(WindowResizeEvent& e)
 	{
+		int width = e.GetWidth(), height = e.GetHeight();
+		ALALBA_RENDER_2(width, height, { glViewport(0, 0, width, height); });
+		auto& fbs = FrameBufferPool::GetGlobal()->GetAll();
+		for (auto& fb : fbs)
+			fb->Resize(width, height);
 		return false;
+
 	}
 
   bool Application::OnWindowClose(WindowCloseEvent& e)
@@ -82,15 +93,7 @@ namespace Alalba{
 		return true;
 	}
   void Application::Run(){
-    Event* e	= new WindowResizeEvent(1220, 970);
-		if (e->IsInCategory(EventCategoryApplication))
-		{
-			ALALBA_APP_TRACE(e->ToString());
-		}
-		if (e->IsInCategory(EventCategoryInput))
-		{
-			ALALBA_APP_TRACE(e->ToString() );
-		}
+		OnInit();
     while(m_Running){
 			// Maybe we should put the clear command into the Que Here
 			// Not in the each layer->OnUpdate() function
@@ -103,4 +106,30 @@ namespace Alalba{
 			m_Window->OnUpdate();
     }
   }
+
+	std::string Application::OpenFile(const std::string& filter) const
+	{
+		OPENFILENAMEA ofn;       // common dialog box structure
+		CHAR szFile[260] = { 0 };       // if using TCHAR macros
+
+		// Initialize OPENFILENAME
+		ZeroMemory(&ofn, sizeof(OPENFILENAME));
+		ofn.lStructSize = sizeof(OPENFILENAME);
+		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)m_Window->GetNativeWindow());
+		ofn.lpstrFile = szFile;
+		ofn.nMaxFile = sizeof(szFile);
+		ofn.lpstrFilter = "All\0*.*\0";
+		ofn.nFilterIndex = 1;
+		ofn.lpstrFileTitle = NULL;
+		ofn.nMaxFileTitle = 0;
+		ofn.lpstrInitialDir = NULL;
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+		if (GetOpenFileNameA(&ofn) == TRUE)
+		{
+			return ofn.lpstrFile;
+		}
+		return std::string();
+	}
+
 }

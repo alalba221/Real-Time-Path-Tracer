@@ -1,44 +1,44 @@
 #include "alalbapch.h"
-#include "Framebuffer.h"
+#include "FrameBuffer.h"
 
 #include "Alalba/Platforms/OpenGL/OpenGLFrameBuffer.h"
 
 namespace Alalba {
 
-	Alalba::Framebuffer* Framebuffer::Create(uint32_t width, uint32_t height, FramebufferFormat format)
+	Alalba::FrameBuffer* FrameBuffer::Create(uint32_t width, uint32_t height, FrameBufferFormat format)
 	{
-		Alalba::Framebuffer* result = nullptr;
+		Alalba::FrameBuffer* result = nullptr;
 
 		switch (RendererAPI::Current())
 		{
 		case RendererAPIType::None:		return nullptr;
-		case RendererAPIType::OpenGL:	result = new OpenGLFramebuffer(width, height, format);
+		case RendererAPIType::OpenGL:	result = new OpenGLFrameBuffer(width, height, format);
 		}
-		FramebufferPool::GetGlobal()->Add(result);
+		FrameBufferPool::GetGlobal()->Add(result);
 		return result;
 	}
 
-	FramebufferPool* FramebufferPool::s_Instance = new FramebufferPool;
+	FrameBufferPool* FrameBufferPool::s_Instance = new FrameBufferPool;
 
-	FramebufferPool::FramebufferPool(uint32_t maxFBs /* = 32 */)
+	FrameBufferPool::FrameBufferPool(uint32_t maxFBs /* = 32 */)
 	{
 
 	}
 
-	FramebufferPool::~FramebufferPool()
+	FrameBufferPool::~FrameBufferPool()
 	{
 
 	}
 
-	std::weak_ptr<Framebuffer> FramebufferPool::AllocateBuffer()
+	std::weak_ptr<FrameBuffer> FrameBufferPool::AllocateBuffer()
 	{
 		// m_Pool.push_back();
-		return std::weak_ptr<Framebuffer>();
+		return std::weak_ptr<FrameBuffer>();
 	}
 
-	void FramebufferPool::Add(Framebuffer* framebuffer)
+	void FrameBufferPool::Add(FrameBuffer* frameBuffer)
 	{
-		m_Pool.push_back(framebuffer);
+		m_Pool.push_back(frameBuffer);
 	}
 
 }

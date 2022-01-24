@@ -26,74 +26,484 @@ public:
 		m_Camera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 10000.0f))
 	{
 	}
+	virtual ~EditorLayer()
+	{
+	}
+
 	virtual void OnAttach () override
 	{
-	/*	static float vertices[] = {
-			 -0.500000,  -0.500000,	 0.500000,0,0,
-			  0.500000,  -0.500000,	 0.500000,0,0,
-			 -0.500000,		0.500000,	 0.500000,0,0,
-			  0.500000,   0.500000,	 0.500000,0,0,
-			 -0.500000,   0.500000,	-0.500000,0,0,
-			  0.500000,   0.500000, -0.500000,0,0,
-			 -0.500000,  -0.500000, -0.500000,0,0,
-			  0.500000,  -0.500000, -0.500000,0,0 
-		};
 
-		static unsigned int indices[] = {
-			 0, 1, 2,
-			 2, 1, 3,
-			 2, 3, 4,
-			 4, 3, 5,
-			 4, 5, 6,
-			 6, 5, 7,
-			 6, 7, 0,
-			 0, 7, 1,
-			 1, 7, 3,
-			 3, 7, 5,
-			 6, 0, 4,
-			 4, 0, 2
-		};
-		m_VB = std::unique_ptr<Alalba::VertexBuffer>(Alalba::VertexBuffer::Create());
-		m_VB->SetData(vertices, sizeof(vertices));
-
-		m_IB = std::unique_ptr<Alalba::IndexBuffer>(Alalba::IndexBuffer::Create());
-		m_IB->SetData(indices, sizeof(indices));*/
-
-		m_BRDFLUT.reset(Alalba::Texture2D::Create("assets/textures/cerberus/cerberus_A.png"));
+		m_SimplePBRShader.reset(Alalba::Shader::Create("assets/shaders/pbr.glsl"));
+		m_Shader.reset(Alalba::Shader::Create("assets/shaders/shader.glsl"));
 		m_Mesh.reset(new Alalba::Mesh("assets/meshes/cerberus.fbx"));
-		m_SimplePBRShader.reset(Alalba::Shader::Create("assets/shaders/shader.glsl"));
+		m_SphereMesh.reset(new Alalba::Mesh("assets/models/Sphere.fbx"));
+		
+		// Editor
+		m_CheckerboardTex.reset(Alalba::Texture2D::Create("assets/editor/Checkerboard.tga"));
+		
+		m_FrameBuffer.reset(Alalba::FrameBuffer::Create(1280*2, 720*2, Alalba::FrameBufferFormat::RGBA16F));
+		m_FinalPresentBuffer.reset(Alalba::FrameBuffer::Create(1280*2, 720*2, Alalba::FrameBufferFormat::RGBA8));
+		
+		// Create Quad
+		float x = -1, y = -1;
+		float width = 2, height = 2;
+		struct QuadVertex
+		{
+			glm::vec3 Position;
+			glm::vec2 TexCoord;
+		};
+		QuadVertex* data = new QuadVertex[4];
+		data[0].Position = glm::vec3(x, y, 0);
+		data[0].TexCoord = glm::vec2(0, 0);
+
+		data[1].Position = glm::vec3(x + width, y, 0);
+		data[1].TexCoord = glm::vec2(1, 0);
+
+		data[2].Position = glm::vec3(x + width, y + height, 0);
+		data[2].TexCoord = glm::vec2(1, 1);
+
+		data[3].Position = glm::vec3(x, y + height, 0);
+		data[3].TexCoord = glm::vec2(0, 1);
+
+		m_VertexBuffer.reset(Alalba::VertexBuffer::Create());
+		m_VertexBuffer->SetData(data, 4 * sizeof(QuadVertex));
+
+		uint32_t* indices = new uint32_t[6]{ 0, 1, 2, 2, 3, 0, };
+		m_IndexBuffer.reset(Alalba::IndexBuffer::Create());
+		m_IndexBuffer->SetData(indices, 6 * sizeof(unsigned int));
+
+
+
+		m_Light.Direction = { -0.5f, -0.5f, 1.0f };
+		m_Light.Radiance = { 1.0f, 1.0f, 1.0f };
 	}
+	virtual void OnDetach() override
+	{
+	}
+
 	void OnUpdate() override
 	{
+		// THINGS TO LOOK AT:
+		// - BRDF LUT
+		// - Cubemap mips and filtering
+		// - Tonemapping and proper HDR pipeline
+
 		m_Camera.Update();
 		auto viewProjection = m_Camera.GetProjectionMatrix() * m_Camera.GetViewMatrix();
-
+		// 
+		m_FrameBuffer->Bind();
 		Alalba::Renderer::Clear(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], m_ClearColor[3]);
-	
-		Alalba::UniformBufferDeclaration<sizeof(glm::mat4) * 2+sizeof(glm::vec4) *1, 3> simplePbrShaderUB;
-		simplePbrShaderUB.Push("u_Color", m_TriangleColor);
+		
+		//Alalba::UniformBufferDeclaration<sizeof(glm::mat4), 1> quadShaderUB;
+		//quadShaderUB.Push("u_ViewProjectionMatrix", glm::inverse(viewProjection));
+		//m_QuadShader->UploadUniformBuffer(quadShaderUB);
+		//m_QuadShader->Bind();
+		//m_EnvironmentIrradiance->Bind(0);
+		//m_VertexBuffer->Bind();
+		//m_IndexBuffer->Bind();
+		//Alalba::Renderer::DrawIndexed(m_IndexBuffer->GetCount(), false);
+
+		Alalba::UniformBufferDeclaration<sizeof(glm::mat4) * 2 + sizeof(glm::vec3) * 4 + sizeof(float) * 8, 14> simplePbrShaderUB;
+		
 		simplePbrShaderUB.Push("u_ViewProjectionMatrix", viewProjection);
 		simplePbrShaderUB.Push("u_ModelMatrix", glm::mat4(1.0f));
+		simplePbrShaderUB.Push("u_AlbedoColor", m_AlbedoInput.Color);
+		simplePbrShaderUB.Push("u_Metalness", m_MetalnessInput.Value);
+		simplePbrShaderUB.Push("u_Roughness", m_RoughnessInput.Value);
+		simplePbrShaderUB.Push("u_AO", m_AOInput.Value);
 
+	//	simplePbrShaderUB.Push("lights.Position", m_Light.Position);
+		simplePbrShaderUB.Push("lights.Color", m_Light.Color);
+		simplePbrShaderUB.Push("lights.Direction", m_Light.Direction);
+	//simplePbrShaderUB.Push("lights.Radiance", m_Light.Radiance * m_LightMultiplier);
+
+		simplePbrShaderUB.Push("u_CameraPosition", m_Camera.GetPosition());
+	//	simplePbrShaderUB.Push("u_RadiancePrefilter", m_RadiancePrefilter ? 1.0f : 0.0f);
+		simplePbrShaderUB.Push("u_AlbedoTexToggle", m_AlbedoInput.UseTexture ? 1.0f : 0.0f);
+		simplePbrShaderUB.Push("u_NormalTexToggle", m_NormalInput.UseTexture ? 1.0f : 0.0f);
+		simplePbrShaderUB.Push("u_MetalnessTexToggle", m_MetalnessInput.UseTexture ? 1.0f : 0.0f);
+		simplePbrShaderUB.Push("u_RoughnessTexToggle", m_RoughnessInput.UseTexture ? 1.0f : 0.0f);
+		simplePbrShaderUB.Push("u_AOTexToggle", m_AOInput.UseTexture ? 1.0f : 0.0f);
+	//	simplePbrShaderUB.Push("u_EnvMapRotation", m_EnvMapRotation);
 		m_SimplePBRShader->UploadUniformBuffer(simplePbrShaderUB);
-		
-		//m_VB->Bind();
+
+		//m_EnvironmentCubeMap->Bind(10);
+		//m_EnvironmentIrradiance->Bind(11);
+		//m_BRDFLUT->Bind(15);
+
 		m_SimplePBRShader->Bind();
-		m_BRDFLUT->Bind(0);
-		/*m_IB->Bind();*/
-		//Alalba::Renderer::DrawIndexed(36);
-		m_Mesh->Render();
+		
+		if (m_AlbedoInput.TextureMap)
+			m_AlbedoInput.TextureMap->Bind(1);
+		if (m_NormalInput.TextureMap)
+			m_NormalInput.TextureMap->Bind(2);
+		if (m_MetalnessInput.TextureMap)
+			m_MetalnessInput.TextureMap->Bind(3);
+		if (m_RoughnessInput.TextureMap)
+			m_RoughnessInput.TextureMap->Bind(4);
+		if (m_AOInput.TextureMap)
+			m_AOInput.TextureMap->Bind(5);
+
+		if (m_Scene == Scene::Spheres)
+		{
+			// Metals
+			float roughness = 0.0f;
+			float x = -88.0f;
+			for (int i = 0; i < 8; i++)
+			{
+				m_SimplePBRShader->SetMat4("u_ModelMatrix", glm::translate(glm::mat4(1.0f), glm::vec3(x, 0.0f, 0.0f)));
+				m_SimplePBRShader->SetFloat("u_Roughness", roughness);
+				m_SimplePBRShader->SetFloat("u_Metalness", 1.0f);
+				m_SimplePBRShader->SetFloat("u_AO", 1.0f);
+				m_SphereMesh->Render();
+
+				roughness += 0.15f;
+				x += 22.0f;
+			}
+
+			// Dielectrics
+			roughness = 0.0f;
+			x = -88.0f;
+			for (int i = 0; i < 8; i++)
+			{
+				m_SimplePBRShader->SetMat4("u_ModelMatrix", glm::translate(glm::mat4(1.0f), glm::vec3(x, 22.0f, 0.0f)));
+				m_SimplePBRShader->SetFloat("u_Roughness", roughness);
+				m_SimplePBRShader->SetFloat("u_Metalness", 0.0f);
+				m_SimplePBRShader->SetFloat("u_AO", 1.0f);
+				m_SphereMesh->Render();
+
+				roughness += 0.15f;
+				x += 22.0f;
+			}
+
+		}
+		else if (m_Scene == Scene::Model)
+		{
+			m_Mesh->Render();
+		}
+		m_FrameBuffer->Unbind();
+		
+		// 
+		m_FinalPresentBuffer->Bind();
+		Alalba::Renderer::Clear(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], m_ClearColor[3]);
+		//m_HDRShader->Bind();
+		//m_HDRShader->SetFloat("u_Exposure", m_Exposure);
+		m_Shader->Bind();
+		m_FrameBuffer->BindTexture();
+		m_VertexBuffer->Bind();
+		m_IndexBuffer->Bind();
+		Alalba::Renderer::DrawIndexed(m_IndexBuffer->GetCount(), false);
+		m_FinalPresentBuffer->Unbind();
+
 	}
 
 	virtual void OnImGuiRender() override
 	{
-		static bool show_demo_window = true;
-		if (show_demo_window)
-			ImGui::ShowDemoWindow(&show_demo_window);
 
-		ImGui::Begin("GameLayer");
+		//ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+		static bool p_open = true;
+
+		static bool opt_fullscreen_persistant = true;
+		static bool opt_padding = false;
+		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+		bool opt_fullscreen = opt_fullscreen_persistant;
+
+		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+		// because it would be confusing to have two docking targets within each others.
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+		if (opt_fullscreen)
+		{
+			ImGuiViewport* viewport = ImGui::GetMainViewport();
+			ImGui::SetNextWindowPos(viewport->Pos);
+			ImGui::SetNextWindowSize(viewport->Size);
+			ImGui::SetNextWindowViewport(viewport->ID);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+			window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		}
+
+		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
+		// and handle the pass-thru hole, so we ask Begin() to not render a background.
+		if (ImGuiDockNodeFlags_PassthruCentralNode)
+			window_flags |= ImGuiWindowFlags_NoBackground;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("DockSpace Demo", &p_open, window_flags);
+		ImGui::PopStyleVar();
+
+		if (opt_fullscreen)
+			ImGui::PopStyleVar(2);
+
+		// Dockspace
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+		{
+			ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+		}
+		// Editor Panel ------------------------------------------------------------------------------
+		ImGui::Begin("Settings");
+		if (ImGui::TreeNode("Shaders"))
+		{
+			auto& shaders = Alalba::Shader::s_AllShaders;
+			for (auto& shader : shaders)
+			{
+				if (ImGui::TreeNode(shader->GetName().c_str()))
+				{
+					std::string buttonName = "Reload##" + shader->GetName();
+					if (ImGui::Button(buttonName.c_str()))
+						shader->Reload();
+					ImGui::TreePop();
+				}
+			}
+			ImGui::TreePop();
+		}
+		ImGui::RadioButton("Spheres", (int*)&m_Scene, (int)Scene::Spheres);
+		ImGui::SameLine();
+		ImGui::RadioButton("Model", (int*)&m_Scene, (int)Scene::Model);
 		ImGui::ColorEdit4("Clear Color", m_ClearColor);
-		ImGui::ColorEdit4("Triangle Color", glm::value_ptr(m_TriangleColor));
+
+		ImGui::SliderFloat3("Light Dir", glm::value_ptr(m_Light.Direction), -1, 1);
+		ImGui::ColorEdit3("Light Radiance", glm::value_ptr(m_Light.Radiance));
+		ImGui::SliderFloat3("Light POS", glm::value_ptr(m_Light.Position), -100, 100);
+		ImGui::ColorEdit3("Light Color", glm::value_ptr(m_Light.Color));
+		ImGui::SliderFloat("Light Multiplier", &m_LightMultiplier, 0.0f, 5.0f);
+		ImGui::SliderFloat("Exposure", &m_Exposure, 0.0f, 10.0f);
+
+		auto cameraForward = m_Camera.GetForwardDirection();
+		ImGui::Text("Camera Forward: %.2f, %.2f, %.2f", cameraForward.x, cameraForward.y, cameraForward.z);
+		auto cameraPosition = m_Camera.GetPosition();
+		ImGui::Text("Camera Forward: %.2f, %.2f, %.2f", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+		
+		ImGui::Separator();
+		{
+			ImGui::Text("Mesh");
+			std::string fullpath = m_Mesh ? m_Mesh->GetFilePath() : "None";
+			size_t found = fullpath.find_last_of("/\\");
+			std::string path = found != std::string::npos ? fullpath.substr(found + 1) : fullpath;
+			ImGui::Text(path.c_str()); ImGui::SameLine();
+			if (ImGui::Button("...##Mesh"))
+			{
+				std::string filename = Alalba::Application::Get().OpenFile("");
+				if (filename != "")
+					m_Mesh.reset(new Alalba::Mesh(filename));
+			}
+		}
+		ImGui::Separator();
+
+		ImGui::Text("Shader Parameters");
+		ImGui::Checkbox("Radiance Prefiltering", &m_RadiancePrefilter);
+		ImGui::SliderFloat("Env Map Rotation", &m_EnvMapRotation, -360.0f, 360.0f);
+
+		ImGui::Separator();
+
+		// Textures ------------------------------------------------------------------------------
+		{
+			// Albedo
+			if (ImGui::CollapsingHeader("Albedo", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+				ImGui::Image(m_AlbedoInput.TextureMap ? (void*)m_AlbedoInput.TextureMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
+				ImGui::PopStyleVar();
+				if (ImGui::IsItemHovered())
+				{
+					if (m_AlbedoInput.TextureMap)
+					{
+						ImGui::BeginTooltip();
+						ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+						ImGui::TextUnformatted(m_AlbedoInput.TextureMap->GetPath().c_str());
+						ImGui::PopTextWrapPos();
+						ImGui::Image((void*)m_AlbedoInput.TextureMap->GetRendererID(), ImVec2(384, 384));
+						ImGui::EndTooltip();
+					}
+					if (ImGui::IsItemClicked())
+					{
+						std::string filename = Alalba::Application::Get().OpenFile("");
+						if (filename != "")
+							m_AlbedoInput.TextureMap.reset(Alalba::Texture2D::Create(filename, m_AlbedoInput.SRGB));
+					}
+				}
+				ImGui::SameLine();
+				ImGui::BeginGroup();
+				ImGui::Checkbox("Use##AlbedoMap", &m_AlbedoInput.UseTexture);
+				if (ImGui::Checkbox("sRGB##AlbedoMap", &m_AlbedoInput.SRGB))
+				{
+					if (m_AlbedoInput.TextureMap)
+						m_AlbedoInput.TextureMap.reset(Alalba::Texture2D::Create(m_AlbedoInput.TextureMap->GetPath(), m_AlbedoInput.SRGB));
+				}
+				ImGui::EndGroup();
+				ImGui::SameLine();
+				ImGui::ColorEdit3("Color##Albedo", glm::value_ptr(m_AlbedoInput.Color), ImGuiColorEditFlags_NoInputs);
+			}
+		}
+		{
+			// Normals
+			if (ImGui::CollapsingHeader("Normals", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+				ImGui::Image(m_NormalInput.TextureMap ? (void*)m_NormalInput.TextureMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
+				ImGui::PopStyleVar();
+				if (ImGui::IsItemHovered())
+				{
+					if (m_NormalInput.TextureMap)
+					{
+						ImGui::BeginTooltip();
+						ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+						ImGui::TextUnformatted(m_NormalInput.TextureMap->GetPath().c_str());
+						ImGui::PopTextWrapPos();
+						ImGui::Image((void*)m_NormalInput.TextureMap->GetRendererID(), ImVec2(384, 384));
+						ImGui::EndTooltip();
+					}
+					if (ImGui::IsItemClicked())
+					{
+						std::string filename = Alalba::Application::Get().OpenFile("");
+						if (filename != "")
+							m_NormalInput.TextureMap.reset(Alalba::Texture2D::Create(filename));
+					}
+				}
+				ImGui::SameLine();
+				ImGui::Checkbox("Use##NormalMap", &m_NormalInput.UseTexture);
+			}
+		}
+		{
+			// Metalness
+			if (ImGui::CollapsingHeader("Metalness", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+				ImGui::Image(m_MetalnessInput.TextureMap ? (void*)m_MetalnessInput.TextureMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
+				ImGui::PopStyleVar();
+				if (ImGui::IsItemHovered())
+				{
+					if (m_MetalnessInput.TextureMap)
+					{
+						ImGui::BeginTooltip();
+						ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+						ImGui::TextUnformatted(m_MetalnessInput.TextureMap->GetPath().c_str());
+						ImGui::PopTextWrapPos();
+						ImGui::Image((void*)m_MetalnessInput.TextureMap->GetRendererID(), ImVec2(384, 384));
+						ImGui::EndTooltip();
+					}
+					if (ImGui::IsItemClicked())
+					{
+						std::string filename = Alalba::Application::Get().OpenFile("");
+						if (filename != "")
+							m_MetalnessInput.TextureMap.reset(Alalba::Texture2D::Create(filename));
+					}
+				}
+				ImGui::SameLine();
+				ImGui::Checkbox("Use##MetalnessMap", &m_MetalnessInput.UseTexture);
+				ImGui::SameLine();
+				ImGui::SliderFloat("Value##MetalnessInput", &m_MetalnessInput.Value, 0.0f, 1.0f);
+			}
+		}
+		{
+			// Roughness
+			if (ImGui::CollapsingHeader("Roughness", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+				ImGui::Image(m_RoughnessInput.TextureMap ? (void*)m_RoughnessInput.TextureMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
+				ImGui::PopStyleVar();
+				if (ImGui::IsItemHovered())
+				{
+					if (m_RoughnessInput.TextureMap)
+					{
+						ImGui::BeginTooltip();
+						ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+						ImGui::TextUnformatted(m_RoughnessInput.TextureMap->GetPath().c_str());
+						ImGui::PopTextWrapPos();
+						ImGui::Image((void*)m_RoughnessInput.TextureMap->GetRendererID(), ImVec2(384, 384));
+						ImGui::EndTooltip();
+					}
+					if (ImGui::IsItemClicked())
+					{
+						std::string filename = Alalba::Application::Get().OpenFile("");
+						if (filename != "")
+							m_RoughnessInput.TextureMap.reset(Alalba::Texture2D::Create(filename));
+					}
+				}
+				ImGui::SameLine();
+				ImGui::Checkbox("Use##RoughnessMap", &m_RoughnessInput.UseTexture);
+				ImGui::SameLine();
+				ImGui::SliderFloat("Value##RoughnessInput", &m_RoughnessInput.Value, 0.0f, 1.0f);
+			}
+		}
+
+		{
+			// ao
+			if (ImGui::CollapsingHeader("ao", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+				ImGui::Image(m_AOInput.TextureMap ? (void*)m_AOInput.TextureMap->GetRendererID() : (void*)m_CheckerboardTex->GetRendererID(), ImVec2(64, 64));
+				ImGui::PopStyleVar();
+				if (ImGui::IsItemHovered())
+				{
+					if (m_AOInput.TextureMap)
+					{
+						ImGui::BeginTooltip();
+						ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+						ImGui::TextUnformatted(m_AOInput.TextureMap->GetPath().c_str());
+						ImGui::PopTextWrapPos();
+						ImGui::Image((void*)m_AOInput.TextureMap->GetRendererID(), ImVec2(384, 384));
+						ImGui::EndTooltip();
+					}
+					if (ImGui::IsItemClicked())
+					{
+						std::string filename = Alalba::Application::Get().OpenFile("");
+						if (filename != "")
+							m_AOInput.TextureMap.reset(Alalba::Texture2D::Create(filename));
+					}
+				}
+				ImGui::SameLine();
+				ImGui::Checkbox("Use##AOMap", &m_AOInput.UseTexture);
+				ImGui::SameLine();
+				ImGui::SliderFloat("Value##AOInput", &m_AOInput.Value, 0.0f, 1.0f);
+			}
+		}
+
+		ImGui::Separator();
+		ImGui::End();
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		ImGui::Begin("Viewport");
+		auto viewportSize = ImGui::GetContentRegionAvail();
+		m_FrameBuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
+		m_FinalPresentBuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
+		m_Camera.SetProjectionMatrix(glm::perspectiveFov(glm::radians(45.0f), viewportSize.x, viewportSize.y, 0.1f, 10000.0f));
+		ImGui::Image((void*)m_FinalPresentBuffer->GetColorAttachmentRendererID(), viewportSize, { 0, 1 }, { 1, 0 });
+		ImGui::End();
+		ImGui::PopStyleVar();
+		
+
+		if (ImGui::BeginMenuBar())
+		{
+			if (ImGui::BeginMenu("Docking"))
+			{
+				// Disabling fullscreen would allow the window to be moved to the front of other windows, 
+				// which we can't undo at the moment without finer window depth/z control.
+				//ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
+
+				if (ImGui::MenuItem("Flag: NoSplit", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0))                 dockspace_flags ^= ImGuiDockNodeFlags_NoSplit;
+				if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0))  dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode;
+				if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0))                dockspace_flags ^= ImGuiDockNodeFlags_NoResize;
+				if (ImGui::MenuItem("Flag: PassthruDockspace", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0))       dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode;
+				if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0))          dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar;
+				ImGui::Separator();
+				if (ImGui::MenuItem("Close DockSpace", NULL, false, p_open != NULL))
+					p_open = false;
+				ImGui::EndMenu();
+			}
+			ImGuiShowHelpMarker(
+				"You can _always_ dock _any_ window into another by holding the SHIFT key while moving a window. Try it now!" "\n"
+				"This demo app has nothing to do with it!" "\n\n"
+				"This demo app only demonstrate the use of ImGui::DockSpace() which allows you to manually create a docking node _within_ another window. This is useful so you can decorate your main application window (e.g. with a menu bar)." "\n\n"
+				"ImGui::DockSpace() comes with one hard constraint: it needs to be submitted _before_ any window which may be docked into it. Therefore, if you use a dock spot as the central point of your application, you'll probably want it to be part of the very first window you are submitting to imgui every frame." "\n\n"
+				"(NB: because of this constraint, the implicit \"Debug\" window can not be docked into an explicit DockSpace() node, because that window is submitted as part of the NewFrame() call. An easy workaround is that you can create your own implicit \"Debug##2\" window after calling DockSpace() and leave it in the window stack for anyone to use.)"
+			);
+
+			ImGui::EndMenuBar();
+		}
+
 		ImGui::End();
 
 	}
@@ -101,25 +511,103 @@ public:
 	void OnEvent(Alalba::Event& event) override
 	{
 		
-		if (event.GetEventType() == Alalba::EventType::KeyPressed)
-		{
-			Alalba::KeyPressedEvent& e = (Alalba::KeyPressedEvent&)event;
-			if (e.GetKeyCode() == ALALBA_TAB)
-					ALALBA_APP_TRACE("Tab key is pressed (event)!");
-			//	ALALBA_APP_TRACE("{0}", (char)e.GetKeyCode());
-		}
+		//if (event.GetEventType() == Alalba::EventType::KeyPressed)
+		//{
+		//	Alalba::KeyPressedEvent& e = (Alalba::KeyPressedEvent&)event;
+		//	if (e.GetKeyCode() == ALALBA_TAB)
+		//			ALALBA_APP_TRACE("Tab key is pressed (event)!");
+		//	//	ALALBA_APP_TRACE("{0}", (char)e.GetKeyCode());
+		//}
 	}
 	private: 
 		
 		Alalba::Camera m_Camera;
 		float m_ClearColor[4];
-		std::unique_ptr<Alalba::VertexBuffer> m_VB;
-		std::unique_ptr<Alalba::IndexBuffer> m_IB;
-		std::unique_ptr<Alalba::Shader> m_SimplePBRShader;
+	
 		glm::vec4 m_TriangleColor;
 
-		std::unique_ptr<Alalba::Texture2D> m_BRDFLUT;
+		std::unique_ptr<Alalba::Shader> m_Shader;
+		std::unique_ptr<Alalba::Shader> m_PBRShader;
+		std::unique_ptr<Alalba::Shader> m_SimplePBRShader;
+		std::unique_ptr<Alalba::Shader> m_QuadShader;
+		std::unique_ptr<Alalba::Shader> m_HDRShader;
 		std::unique_ptr<Alalba::Mesh> m_Mesh;
+		std::unique_ptr<Alalba::Mesh> m_SphereMesh;
+		std::unique_ptr<Alalba::Texture2D> m_BRDFLUT;
+
+
+		struct AlbedoInput
+		{
+			glm::vec3 Color = { 0.972f, 0.96f, 0.915f }; // Silver, from https://docs.unrealengine.com/en-us/Engine/Rendering/Materials/PhysicallyBased
+			std::unique_ptr<Alalba::Texture2D> TextureMap;
+			bool SRGB = false;
+			bool UseTexture = false;
+		};
+		AlbedoInput m_AlbedoInput;
+
+		struct NormalInput
+		{
+			std::unique_ptr<Alalba::Texture2D> TextureMap;
+			bool UseTexture = false;
+		};
+		NormalInput m_NormalInput;
+
+		struct MetalnessInput
+		{
+			float Value = 1.0f;
+			std::unique_ptr<Alalba::Texture2D> TextureMap;
+			bool UseTexture = false;
+		};
+		MetalnessInput m_MetalnessInput;
+
+		struct RoughnessInput
+		{
+			float Value = 0.5f;
+			std::unique_ptr<Alalba::Texture2D> TextureMap;
+			bool UseTexture = false;
+		};
+		RoughnessInput m_RoughnessInput;
+
+		struct AOInput
+		{
+			float Value = 0.5f;
+			std::unique_ptr<Alalba::Texture2D> TextureMap;
+			bool UseTexture = false;
+		};
+		AOInput m_AOInput;
+
+		std::unique_ptr<Alalba::FrameBuffer> m_FrameBuffer, m_FinalPresentBuffer;
+										
+		std::unique_ptr<Alalba::VertexBuffer> m_VertexBuffer;
+		std::unique_ptr<Alalba::IndexBuffer> m_IndexBuffer;
+		std::unique_ptr<Alalba::TextureCube> m_EnvironmentCubeMap, m_EnvironmentIrradiance;
+
+		struct Light
+		{
+			glm::vec3 Position;
+			glm::vec3 Direction;
+			glm::vec3 Radiance;
+			glm::vec3 Color;
+		};
+		Light m_Light;
+		float m_LightMultiplier = 0.3f;
+
+		// PBR params
+		float m_Exposure = 1.0f;
+
+		bool m_RadiancePrefilter = false;
+
+		float m_EnvMapRotation = 0.0f;
+
+		enum class Scene : uint32_t
+		{
+			Spheres = 0, Model = 1
+		};
+		Scene m_Scene;
+
+		// Editor resources
+		std::unique_ptr<Alalba::Texture2D> m_CheckerboardTex;
+
 
 };
 
