@@ -77,7 +77,7 @@
       <PrecompiledHeaderFile>alalbapch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;ALALBA_PLATFORM_WINDOWS;ALALBA_BUILD_DLL;GLFW_INCLUDE_NONE;ALALBA_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\Glad\include;vendor\GLFW\include;vendor\imgui;vendor\glm;vendor\stb\include;vendor\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\Glad\include;vendor\GLFW\include;vendor\imgui;vendor\glm;vendor\stb\include;vendor\assimp\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\extras\CUPTI\include;C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -91,7 +91,7 @@
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <PostBuildEvent>
-      <Command>IF EXIST vendor\assimp\win64\assimp.dll\ (xcopy /Q /E /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Debug-windows-x86_64\Sandbox &gt; nul)</Command>
+      <Command>IF EXIST vendor\assimp\win64\assimp.dll\ (xcopy /Q /E /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Debug-windows-x86_64\RealTime &gt; nul) ELSE (xcopy /Q /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Debug-windows-x86_64\RealTime &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -100,7 +100,7 @@
       <PrecompiledHeaderFile>alalbapch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;ALALBA_PLATFORM_WINDOWS;ALALBA_BUILD_DLL;GLFW_INCLUDE_NONE;ALALBA_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\Glad\include;vendor\GLFW\include;vendor\imgui;vendor\glm;vendor\stb\include;vendor\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\Glad\include;vendor\GLFW\include;vendor\imgui;vendor\glm;vendor\stb\include;vendor\assimp\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\extras\CUPTI\include;C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -118,7 +118,7 @@
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <PostBuildEvent>
-      <Command>IF EXIST vendor\assimp\win64\assimp.dll\ (xcopy /Q /E /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Release-windows-x86_64\Sandbox &gt; nul)</Command>
+      <Command>IF EXIST vendor\assimp\win64\assimp.dll\ (xcopy /Q /E /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Release-windows-x86_64\RealTime &gt; nul) ELSE (xcopy /Q /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Release-windows-x86_64\RealTime &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
@@ -127,7 +127,7 @@
       <PrecompiledHeaderFile>alalbapch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;ALALBA_PLATFORM_WINDOWS;ALALBA_BUILD_DLL;GLFW_INCLUDE_NONE;ALALBA_Dist;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\Glad\include;vendor\GLFW\include;vendor\imgui;vendor\glm;vendor\stb\include;vendor\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\Glad\include;vendor\GLFW\include;vendor\imgui;vendor\glm;vendor\stb\include;vendor\assimp\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\extras\CUPTI\include;C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -145,7 +145,7 @@
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <PostBuildEvent>
-      <Command>IF EXIST vendor\assimp\win64\assimp.dll\ (xcopy /Q /E /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Dist-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Dist-windows-x86_64\Sandbox &gt; nul)</Command>
+      <Command>IF EXIST vendor\assimp\win64\assimp.dll\ (xcopy /Q /E /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Dist-windows-x86_64\RealTime &gt; nul) ELSE (xcopy /Q /Y /I vendor\assimp\win64\assimp.dll  ..\bin\Dist-windows-x86_64\RealTime &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -165,6 +165,7 @@
     <ClInclude Include="src\Alalba\Core\Window.h" />
     <ClInclude Include="src\Alalba\EntryPoint.h" />
     <ClInclude Include="src\Alalba\ImGui\ImGuiLayer.h" />
+    <ClInclude Include="src\Alalba\Optix\OptixLayer.h" />
     <ClInclude Include="src\Alalba\Platforms\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Alalba\Platforms\OpenGL\OpenGLFrameBuffer.h" />
     <ClInclude Include="src\Alalba\Platforms\OpenGL\OpenGLShader.h" />
@@ -605,6 +606,7 @@
     <ClCompile Include="src\Alalba\Core\Window.cpp" />
     <ClCompile Include="src\Alalba\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Alalba\ImGui\ImGuiLayer.cpp" />
+    <ClCompile Include="src\Alalba\Optix\OptixLayer.cpp" />
     <ClCompile Include="src\Alalba\Platforms\OpenGL\OpenGLBuffer.cpp" />
     <ClCompile Include="src\Alalba\Platforms\OpenGL\OpenGLFrameBuffer.cpp" />
     <ClCompile Include="src\Alalba\Platforms\OpenGL\OpenGLRendererAPI.cpp" />

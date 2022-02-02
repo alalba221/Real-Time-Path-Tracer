@@ -17,6 +17,7 @@
 #include "Alalba/ImGui/ImGuiLayer.h"
 #include "imgui/imgui.h"
 
+#include "Alalba/Optix/OptixLayer.h"
 // ---  Render API ------------------------------
 #include "Alalba/Renderer/Renderer.h"
 #include "Alalba/Renderer/FrameBuffer.h"

@@ -16,6 +16,9 @@
     <Filter Include="src\Alalba\ImGui">
       <UniqueIdentifier>{633A38D8-4F33-572A-7865-3CAF64BD3636}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Alalba\Optix">
+      <UniqueIdentifier>{7C30A7D8-6829-C62A-915B-ABAF7DB3A536}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Alalba\Platforms">
       <UniqueIdentifier>{00810767-EC0F-9130-952E-A52B819CA1D6}</UniqueIdentifier>
     </Filter>
@@ -101,6 +104,9 @@
     </ClInclude>
     <ClInclude Include="src\Alalba\ImGui\ImGuiLayer.h">
       <Filter>src\Alalba\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Alalba\Optix\OptixLayer.h">
+      <Filter>src\Alalba\Optix</Filter>
     </ClInclude>
     <ClInclude Include="src\Alalba\Platforms\OpenGL\OpenGLBuffer.h">
       <Filter>src\Alalba\Platforms\OpenGL</Filter>
@@ -1417,6 +1423,9 @@
     </ClCompile>
     <ClCompile Include="src\Alalba\ImGui\ImGuiLayer.cpp">
       <Filter>src\Alalba\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Alalba\Optix\OptixLayer.cpp">
+      <Filter>src\Alalba\Optix</Filter>
     </ClCompile>
     <ClCompile Include="src\Alalba\Platforms\OpenGL\OpenGLBuffer.cpp">
       <Filter>src\Alalba\Platforms\OpenGL</Filter>

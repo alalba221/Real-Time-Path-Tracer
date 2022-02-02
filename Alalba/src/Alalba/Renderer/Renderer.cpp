@@ -13,6 +13,9 @@ namespace Alalba {
 
 	void Renderer::Clear()
 	{
+		ALALBA_RENDER( {
+			 RendererAPI::Clear(0, 0, 0, 1);
+			});
 	}
 
 	void Renderer::Clear(float r, float g, float b, float a)

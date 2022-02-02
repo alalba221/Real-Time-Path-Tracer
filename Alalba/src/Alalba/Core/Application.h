@@ -34,7 +34,7 @@ namespace Alalba{
 		bool OnWindowResize(WindowResizeEvent& e);
 	private:
 		std::unique_ptr<Window> m_Window;
-		bool m_Running = true;
+		bool m_Running = true, m_Minimized = false;
 		LayerStack m_LayerStack;
 		ImGuiLayer* m_ImGuiLayer;
 

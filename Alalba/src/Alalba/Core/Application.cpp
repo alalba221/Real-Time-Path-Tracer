@@ -79,6 +79,13 @@ namespace Alalba{
 	bool Application::OnWindowResize(WindowResizeEvent& e)
 	{
 		int width = e.GetWidth(), height = e.GetHeight();
+		if (width == 0 || height == 0)
+		{
+			m_Minimized = true;
+			return false;
+		}
+		m_Minimized = false;
+
 		ALALBA_RENDER_2(width, height, { glViewport(0, 0, width, height); });
 		auto& fbs = FrameBufferPool::GetGlobal()->GetAll();
 		for (auto& fb : fbs)
@@ -95,16 +102,20 @@ namespace Alalba{
   void Application::Run(){
 		OnInit();
     while(m_Running){
-			// Maybe we should put the clear command into the Que Here
-			// Not in the each layer->OnUpdate() function
-			for (Layer* layer : m_LayerStack)
-				layer->OnUpdate();
+			if (!m_Minimized)
+			{
+				// Maybe we should put the clear command into the Que Here
+				// Not in the each layer->OnUpdate() function
+				for (Layer* layer : m_LayerStack)
+					layer->OnUpdate();
 
-			Application* app = this;
-			ALALBA_RENDER_1(app, { app->RenderImGui(); });
-			Renderer::Get().WaitAndRender();
+				Application* app = this;
+				ALALBA_RENDER_1(app, { app->RenderImGui(); });
+				Renderer::Get().WaitAndRender();
+			}
 			m_Window->OnUpdate();
     }
+		OnShutdown();
   }
 
 	std::string Application::OpenFile(const std::string& filter) const
