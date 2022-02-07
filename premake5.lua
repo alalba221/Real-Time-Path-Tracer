@@ -116,3 +116,4 @@ project "Alalba"
 
 include "Sandbox/RealTime"
 include "Sandbox/HelloWorld"
+include "Sandbox/02_FirstOPTIXLAUNCH"

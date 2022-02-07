@@ -1,17 +1,17 @@
 #include "Alalba.h"
-#include "imgui/imgui.h"
+//#include "stb/include/stb_image_write.h"
 #include "Alalba/Core/Application.h"
 
 
-class Sandbox : public Alalba::Application {
+class Sandbox02 : public Alalba::Application {
 public:
-	Sandbox()
+	Sandbox02()
 	{
 		// PushLayer(new ExampLayer());
 		PushLayer(new Alalba::OptixLayer());
 	};
-	~Sandbox() {};
+	~Sandbox02() {};
 };
 Alalba::Application* Alalba::CreateApplication() {
-	return new Sandbox();
+	return new Sandbox02();
 }

@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "02_FirstOPTIXLAUNCH", "Sandbox\02_FirstOPTIXLAUNCH\02_FirstOPTIXLAUNCH.vcxproj", "{DD5DB111-49BF-8E1F-D22C-D5D13E8DC5DE}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Alalba", "Alalba\Alalba.vcxproj", "{42B557A7-2E57-827D-1712-96D1035309CE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{53E47842-3FC8-3998-A828-34EB942B241A}"
@@ -22,6 +24,12 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DD5DB111-49BF-8E1F-D22C-D5D13E8DC5DE}.Debug|x64.ActiveCfg = Debug|x64
+		{DD5DB111-49BF-8E1F-D22C-D5D13E8DC5DE}.Debug|x64.Build.0 = Debug|x64
+		{DD5DB111-49BF-8E1F-D22C-D5D13E8DC5DE}.Dist|x64.ActiveCfg = Dist|x64
+		{DD5DB111-49BF-8E1F-D22C-D5D13E8DC5DE}.Dist|x64.Build.0 = Dist|x64
+		{DD5DB111-49BF-8E1F-D22C-D5D13E8DC5DE}.Release|x64.ActiveCfg = Release|x64
+		{DD5DB111-49BF-8E1F-D22C-D5D13E8DC5DE}.Release|x64.Build.0 = Release|x64
 		{42B557A7-2E57-827D-1712-96D1035309CE}.Debug|x64.ActiveCfg = Debug|x64
 		{42B557A7-2E57-827D-1712-96D1035309CE}.Debug|x64.Build.0 = Debug|x64
 		{42B557A7-2E57-827D-1712-96D1035309CE}.Dist|x64.ActiveCfg = Dist|x64

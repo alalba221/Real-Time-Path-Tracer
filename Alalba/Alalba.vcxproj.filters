@@ -105,6 +105,9 @@
     <ClInclude Include="src\Alalba\ImGui\ImGuiLayer.h">
       <Filter>src\Alalba\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="src\Alalba\Optix\LaunchParams.h">
+      <Filter>src\Alalba\Optix</Filter>
+    </ClInclude>
     <ClInclude Include="src\Alalba\Optix\OptixLayer.h">
       <Filter>src\Alalba\Optix</Filter>
     </ClInclude>

@@ -165,6 +165,7 @@
     <ClInclude Include="src\Alalba\Core\Window.h" />
     <ClInclude Include="src\Alalba\EntryPoint.h" />
     <ClInclude Include="src\Alalba\ImGui\ImGuiLayer.h" />
+    <ClInclude Include="src\Alalba\Optix\LaunchParams.h" />
     <ClInclude Include="src\Alalba\Optix\OptixLayer.h" />
     <ClInclude Include="src\Alalba\Platforms\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Alalba\Platforms\OpenGL\OpenGLFrameBuffer.h" />

@@ -1,4 +1,4 @@
-project "HelloWorld"
+project "02_FirstOPTIXLAUNCH"
 	kind "ConsoleApp"
 	staticruntime "on"
 	language "C++"
@@ -14,7 +14,7 @@ local SOURCE_DIR = "source/*"
       SOURCE_DIR .. "**.hpp", 
       SOURCE_DIR .. "**.c",
       SOURCE_DIR .. "**.cpp",
-	  SOURCE_DIR .. "**.cu"
+	--  SOURCE_DIR .. "**.cu"
     }
 	
 	defines
@@ -32,7 +32,12 @@ local SOURCE_DIR = "source/*"
 		"%{IncludeDir.glm}"
 
 	}
-
+	-- Directories relatice to project folder
+	postbuildcommands
+    {
+			--("{COPY} %{cfg.buildtarget.relpath} ../bin/"..outputdir.."/Sandbox")
+			("{COPY} assets  %{wks.location}/bin/" ..outputdir .. "/%{prj.name}")
+    }
 			
 -- add settings common to all project
 dofile("../optix.lua")
