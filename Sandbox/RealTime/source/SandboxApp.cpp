@@ -711,10 +711,12 @@ public:
 
 class Sandbox : public Alalba::Application{
 public:
+	//std::shared_ptr<Alalba::Layer> optix;
   Sandbox()
   {
     PushLayer(new EditorLayer());
   };
+
   ~Sandbox(){};
 };
 Alalba::Application* Alalba::CreateApplication(){

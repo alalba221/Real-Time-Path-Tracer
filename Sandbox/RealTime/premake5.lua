@@ -36,7 +36,7 @@ local SOURCE_DIR = "source/*"
 		"Alalba",
 		"%{wks.location}/Alalba/vendor/assimp/win64/assimp.lib"
 	}
-	
+	dofile("../optix.lua")
 	filter "system:windows"
 		
 		systemversion "latest"

@@ -1,4 +1,4 @@
-project "02_FirstOPTIXLAUNCH"
+project "RealTime"
 	kind "ConsoleApp"
 	staticruntime "on"
 	language "C++"
@@ -14,7 +14,6 @@ local SOURCE_DIR = "source/*"
       SOURCE_DIR .. "**.hpp", 
       SOURCE_DIR .. "**.c",
       SOURCE_DIR .. "**.cpp",
-	--  SOURCE_DIR .. "**.cu"
     }
 	
 	defines
@@ -32,12 +31,30 @@ local SOURCE_DIR = "source/*"
 		"%{IncludeDir.glm}"
 
 	}
-	-- Directories relatice to project folder
-	postbuildcommands
-    {
-			--("{COPY} %{cfg.buildtarget.relpath} ../bin/"..outputdir.."/Sandbox")
-			--("{COPY} assets  %{wks.location}/bin/" ..outputdir .. "/%{prj.name}")
-    }
-			
--- add settings common to all project
+	links
+	{
+		"Alalba",
+		"%{wks.location}/Alalba/vendor/assimp/win64/assimp.lib"
+	}
+	
+	filter "system:windows"
+		
+		systemversion "latest"
+
+		defines
+		{
+			"ALALBA_PLATFORM_WINDOWS"
+		}
+	filter "configurations:Debug"
+		defines "ALALBA_DEBUG"
+		runtime "Debug"
+		symbols "on"
+	filter "configurations:Release"
+		defines "ALALBA_RELEASE"
+		runtime "Release"
+		optimize "on"
+	filter "configurations:Dist"
+		defines "ALALBA_Dist"
+		runtime "Release"
+		optimize "on"
 dofile("../optix.lua")

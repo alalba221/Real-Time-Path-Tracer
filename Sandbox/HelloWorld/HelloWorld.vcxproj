@@ -79,7 +79,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>ALALBA_PLATFORM_WINDOWS;ALALBA_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\Alalba\vendor\spdlog\include;..\..\Alalba\src;..\..\Alalba\vendor;..\..\Alalba\vendor\glm;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\extras\CUPTI\include;C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Alalba\vendor\spdlog\include;..\..\Alalba\src;..\..\Alalba\vendor;..\..\Alalba\vendor\glm;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\extras\CUPTI\include;C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0\include;..\..\Alalba\vendor\gdt\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -99,7 +99,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>ALALBA_PLATFORM_WINDOWS;ALALBA_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\Alalba\vendor\spdlog\include;..\..\Alalba\src;..\..\Alalba\vendor;..\..\Alalba\vendor\glm;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\extras\CUPTI\include;C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Alalba\vendor\spdlog\include;..\..\Alalba\src;..\..\Alalba\vendor;..\..\Alalba\vendor\glm;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\extras\CUPTI\include;C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0\include;..\..\Alalba\vendor\gdt\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -122,7 +122,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>ALALBA_PLATFORM_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\Alalba\vendor\spdlog\include;..\..\Alalba\src;..\..\Alalba\vendor;..\..\Alalba\vendor\glm;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\extras\CUPTI\include;C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Alalba\vendor\spdlog\include;..\..\Alalba\src;..\..\Alalba\vendor;..\..\Alalba\vendor\glm;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\extras\CUPTI\include;C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0\include;..\..\Alalba\vendor\gdt\source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -140,6 +140,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Alalba\Alalba.vcxproj">
       <Project>{42B557A7-2E57-827D-1712-96D1035309CE}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Alalba\vendor\gdt\gdt.vcxproj">
+      <Project>{6476880B-D07F-887C-59FB-9E7CC503947C}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

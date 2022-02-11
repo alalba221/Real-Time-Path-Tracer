@@ -20,13 +20,17 @@
 	local OPTIX_ROOT = "C:/ProgramData/NVIDIA Corporation"
 	local OPTIX7_INCLUDE_DIR = OPTIX_ROOT .. "/OptiX SDK 7.4.0/include"
 	
+	local VENDOR_DIR = "%{wks.location}/Alalba/vendor/"
+	
 	includedirs
 	{
 		--JAHLEY_DIR,
 		--MODULE_DIR,
 		CUDA_INCLUDE_DIR,
 		CUDA_EXTRA_DIR,
-		OPTIX7_INCLUDE_DIR
+		OPTIX7_INCLUDE_DIR,
+		VENDOR_DIR.."gdt/source"
+		
 		-- THIRD_PARTY_DIR,
 		-- THIRD_PARTY_DIR .. "nanogui/ext/glfw/include",
 		-- THIRD_PARTY_DIR .. "nanogui/include",
@@ -64,10 +68,10 @@
 		-- "zstd_static",
 		"cudart_static",
 		"cuda",
-		"nvrtc"
+		"nvrtc",
 		-- "stb",
 		-- "cs_signal",
-		-- "gdt",
+		"gdt",
     }
 	
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")

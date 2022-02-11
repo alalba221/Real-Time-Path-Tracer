@@ -105,10 +105,16 @@
     <ClInclude Include="src\Alalba\ImGui\ImGuiLayer.h">
       <Filter>src\Alalba\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="src\Alalba\Optix\CUDABuffer.h">
+      <Filter>src\Alalba\Optix</Filter>
+    </ClInclude>
     <ClInclude Include="src\Alalba\Optix\LaunchParams.h">
       <Filter>src\Alalba\Optix</Filter>
     </ClInclude>
-    <ClInclude Include="src\Alalba\Optix\OptixLayer.h">
+    <ClInclude Include="src\Alalba\Optix\SampleRenderer.h">
+      <Filter>src\Alalba\Optix</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Alalba\Optix\optix7.h">
       <Filter>src\Alalba\Optix</Filter>
     </ClInclude>
     <ClInclude Include="src\Alalba\Platforms\OpenGL\OpenGLBuffer.h">
@@ -1427,7 +1433,7 @@
     <ClCompile Include="src\Alalba\ImGui\ImGuiLayer.cpp">
       <Filter>src\Alalba\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="src\Alalba\Optix\OptixLayer.cpp">
+    <ClCompile Include="src\Alalba\Optix\SampleRenderer.cpp">
       <Filter>src\Alalba\Optix</Filter>
     </ClCompile>
     <ClCompile Include="src\Alalba\Platforms\OpenGL\OpenGLBuffer.cpp">

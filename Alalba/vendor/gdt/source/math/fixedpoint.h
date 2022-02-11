@@ -1,5 +1,5 @@
 // ======================================================================== //
-// Copyright 2018-2019 Ingo Wald                                            //
+// Copyright 2018 Ingo Wald                                                 //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
 // you may not use this file except in compliance with the License.         //
@@ -16,15 +16,21 @@
 
 #pragma once
 
-#include "math/vec.h"
+#include "gdt/gdt.h"
+#include "gdt/math/constants.h"
+#include <iostream>
 
-namespace Alalba {
-  using namespace gdt;
-  struct LaunchParams
-  {
-    int       frameID{ 0 };
-    uint32_t* colorBuffer;
-    vec2i     fbSize;
+namespace gdt {
+
+  /*! a n-bit fixed-point float in the [0..1] region */
+  template<typename storageT, int Nbits, int is_signed>
+  struct FixedPoint {
+    FixedPoint();
+
+    float operator float() const {
+      return bits / float((1ULL << Nbits)-1);
+    }
+    storageT bits;
   };
-
-} // ::osc
+}
+ 

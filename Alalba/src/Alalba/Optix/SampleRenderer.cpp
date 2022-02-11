@@ -1,10 +1,24 @@
+// ======================================================================== //
+// Copyright 2018-2019 Ingo Wald                                            //
+//                                                                          //
+// Licensed under the Apache License, Version 2.0 (the "License");          //
+// you may not use this file except in compliance with the License.         //
+// You may obtain a copy of the License at                                  //
+//                                                                          //
+//     http://www.apache.org/licenses/LICENSE-2.0                           //
+//                                                                          //
+// Unless required by applicable law or agreed to in writing, software      //
+// distributed under the License is distributed on an "AS IS" BASIS,        //
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
+// See the License for the specific language governing permissions and      //
+// limitations under the License.                                           //
+// ======================================================================== //
 #include "alalbapch.h"
-#include "OptixLayer.h"
-#include "Alalba/Core/Application.h"
+#include "SampleRenderer.h"
+// this include may only appear in a single source file:
 #include <optix_function_table_definition.h>
-#include "stb_image_write.h"
 
-// From imgui example 
+/*! \namespace osc - Optix Siggraph Course */
 namespace Alalba {
 
   static std::string readPTX(const std::string& filename)
@@ -29,6 +43,8 @@ namespace Alalba {
 
     return ptx.str();
   }
+
+  extern "C" char embedded_ptx_code[];
 
   /*! SBT record for a raygen program */
   struct __align__(OPTIX_SBT_RECORD_ALIGNMENT) RaygenRecord
@@ -57,41 +73,61 @@ namespace Alalba {
     int objectID;
   };
 
-  OptixLayer::OptixLayer()
+  /*! constructor - performs all setup, including initializing
+    optix, creates module, pipeline, programs, SBT, etc. */
+  SampleRenderer::SampleRenderer()
   {
+    initOptix();
 
+    std::cout << "#osc: creating optix context ..." << std::endl;
+    createContext();
+
+    std::cout << "#osc: setting up module ..." << std::endl;
+    createModule();
+
+    std::cout << "#osc: creating raygen programs ..." << std::endl;
+    createRaygenPrograms();
+    std::cout << "#osc: creating miss programs ..." << std::endl;
+    createMissPrograms();
+    std::cout << "#osc: creating hitgroup programs ..." << std::endl;
+    createHitgroupPrograms();
+
+    std::cout << "#osc: setting up optix pipeline ..." << std::endl;
+    createPipeline();
+
+    std::cout << "#osc: building SBT ..." << std::endl;
+    buildSBT();
+
+    launchParamsBuffer.alloc(sizeof(launchParams));
+    std::cout << "#osc: context, module, pipeline, etc, all set up ..." << std::endl;
+
+    std::cout << GDT_TERMINAL_GREEN;
+    std::cout << "#osc: Optix 7 Sample fully set up" << std::endl;
+    std::cout << GDT_TERMINAL_DEFAULT;
   }
 
-  OptixLayer::OptixLayer(const std::string& name)
+  /*! helper function that initializes optix and checks for errors */
+  void SampleRenderer::initOptix()
   {
+    std::cout << "#osc: initializing optix..." << std::endl;
 
-  }
-
-  OptixLayer::~OptixLayer()
-  {
-
-  }
-
-  void OptixLayer::initOptix()
-  {
-    
     // -------------------------------------------------------
     // check for available optix7 capable devices
     // -------------------------------------------------------
     cudaFree(0);
     int numDevices;
     cudaGetDeviceCount(&numDevices);
-    /*if (numDevices == 0)
+    if (numDevices == 0)
       throw std::runtime_error("#osc: no CUDA capable devices found!");
-    std::cout << "#osc: found " << numDevices << " CUDA devices" << std::endl;*/
-    ALALBA_CORE_ASSERT(numDevices != 0, "NO CUDA devices found");
-    ALALBA_CORE_INFO("Found {0} CUDA devices", numDevices);
+    std::cout << "#osc: found " << numDevices << " CUDA devices" << std::endl;
+
     // -------------------------------------------------------
     // initialize optix
     // -------------------------------------------------------
-    OptixResult res = optixInit();
-    ALALBA_CORE_ASSERT(res == OPTIX_SUCCESS, "Optix Init failed");
-    ALALBA_CORE_INFO("successfully initialized optix... yay!");
+    OPTIX_CHECK(optixInit());
+    std::cout << GDT_TERMINAL_GREEN
+      << "#osc: successfully initialized optix... yay!"
+      << GDT_TERMINAL_DEFAULT << std::endl;
   }
 
   static void context_log_cb(unsigned int level,
@@ -102,32 +138,33 @@ namespace Alalba {
     fprintf(stderr, "[%2d][%12s]: %s\n", (int)level, tag, message);
   }
 
-  void OptixLayer::createContext()
+  /*! creates and configures a optix device context (in this simple
+      example, only for the primary GPU device) */
+  void SampleRenderer::createContext()
   {
-    /// for this sample, do everything on one device
+    // for this sample, do everything on one device
     const int deviceID = 0;
-    // set device we want to run o
-    ALALBA_CORE_ASSERT(cudaSetDevice(deviceID)== cudaSuccess, "cuda set device failed");
-    // create a stream (for later)
-    ALALBA_CORE_ASSERT(cudaStreamCreate(&stream) == cudaSuccess,"cuda create stream failed");
+    CUDA_CHECK(SetDevice(deviceID));
+    CUDA_CHECK(StreamCreate(&stream));
 
     cudaGetDeviceProperties(&deviceProps, deviceID);
-    ALALBA_CORE_INFO("running on device:", deviceProps.name);
-    
-    // get current CUDA device context
-    CUresult  cuRes = cuCtxGetCurrent(&cudaContext);
-    ALALBA_CORE_ASSERT(cuRes == cudaSuccess, "Error querying current context: error code", cuRes);
-    // create optix context
-    ALALBA_CORE_ASSERT(optixDeviceContextCreate(cudaContext, 0, &optixContext)== OPTIX_SUCCESS," create optix context failed");
+    std::cout << "#osc: running on device: " << deviceProps.name << std::endl;
 
-    ALALBA_CORE_ASSERT(optixDeviceContextSetLogCallback
-    (optixContext, context_log_cb, nullptr, 4)== OPTIX_SUCCESS," ????");
+    CUresult  cuRes = cuCtxGetCurrent(&cudaContext);
+    if (cuRes != CUDA_SUCCESS)
+      fprintf(stderr, "Error querying current context: error code %d\n", cuRes);
+
+    OPTIX_CHECK(optixDeviceContextCreate(cudaContext, 0, &optixContext));
+    OPTIX_CHECK(optixDeviceContextSetLogCallback
+    (optixContext, context_log_cb, nullptr, 4));
   }
+
+
 
   /*! creates the module that contains all the programs we are going
       to use. in this simple example, we use a single module from a
       single .cu file, using a single embedded ptx string */
-  void OptixLayer::createModule()
+  void SampleRenderer::createModule()
   {
     moduleCompileOptions.maxRegisterCount = 50;
     moduleCompileOptions.optLevel = OPTIX_COMPILE_OPTIMIZATION_DEFAULT;
@@ -143,21 +180,25 @@ namespace Alalba {
 
     pipelineLinkOptions.maxTraceDepth = 2;
 
-    std::string ptxCode = readPTX("assets/devicePrograms.ptx");;
-
+    //const std::string ptxCode = embedded_ptx_code;
+    const std::string ptxCode = readPTX("assets/deviceCode.ptx");
     char log[2048];
     size_t sizeof_log = sizeof(log);
-    ALALBA_CORE_ASSERT(optixModuleCreateFromPTX(optixContext,
+    OPTIX_CHECK(optixModuleCreateFromPTX(optixContext,
       &moduleCompileOptions,
       &pipelineCompileOptions,
       ptxCode.c_str(),
       ptxCode.size(),
       log, &sizeof_log,
       &module
-    )== OPTIX_SUCCESS,log);
+    ));
+    if (sizeof_log > 1) PRINT(log);
   }
 
-  void OptixLayer::createRaygenPrograms()
+
+
+  /*! does all setup for the raygen program(s) we are going to use */
+  void SampleRenderer::createRaygenPrograms()
   {
     // we do a single ray gen program in this example:
     raygenPGs.resize(1);
@@ -171,16 +212,18 @@ namespace Alalba {
     // OptixProgramGroup raypg;
     char log[2048];
     size_t sizeof_log = sizeof(log);
-    ALALBA_CORE_ASSERT(optixProgramGroupCreate(optixContext,
+    OPTIX_CHECK(optixProgramGroupCreate(optixContext,
       &pgDesc,
       1,
       &pgOptions,
       log, &sizeof_log,
       &raygenPGs[0]
-    ) == OPTIX_SUCCESS, log);
+    ));
+    if (sizeof_log > 1) PRINT(log);
   }
 
-  void OptixLayer::createMissPrograms()
+  /*! does all setup for the miss program(s) we are going to use */
+  void SampleRenderer::createMissPrograms()
   {
     // we do a single ray gen program in this example:
     missPGs.resize(1);
@@ -194,17 +237,18 @@ namespace Alalba {
     // OptixProgramGroup raypg;
     char log[2048];
     size_t sizeof_log = sizeof(log);
-    ALALBA_CORE_ASSERT(optixProgramGroupCreate(optixContext,
+    OPTIX_CHECK(optixProgramGroupCreate(optixContext,
       &pgDesc,
       1,
       &pgOptions,
       log, &sizeof_log,
       &missPGs[0]
-    ) == OPTIX_SUCCESS, log);
+    ));
+    if (sizeof_log > 1) PRINT(log);
   }
 
   /*! does all setup for the hitgroup program(s) we are going to use */
-  void OptixLayer::createHitgroupPrograms()
+  void SampleRenderer::createHitgroupPrograms()
   {
     // for this simple example, we set up a single hit group
     hitgroupPGs.resize(1);
@@ -219,17 +263,19 @@ namespace Alalba {
 
     char log[2048];
     size_t sizeof_log = sizeof(log);
-    ALALBA_CORE_ASSERT(optixProgramGroupCreate(optixContext,
+    OPTIX_CHECK(optixProgramGroupCreate(optixContext,
       &pgDesc,
       1,
       &pgOptions,
       log, &sizeof_log,
       &hitgroupPGs[0]
-    ) == OPTIX_SUCCESS, log);
+    ));
+    if (sizeof_log > 1) PRINT(log);
   }
 
+
   /*! assembles the full pipeline of all programs */
-  void OptixLayer::createPipeline()
+  void SampleRenderer::createPipeline()
   {
     std::vector<OptixProgramGroup> programGroups;
     for (auto pg : raygenPGs)
@@ -241,16 +287,17 @@ namespace Alalba {
 
     char log[2048];
     size_t sizeof_log = sizeof(log);
-    ALALBA_CORE_ASSERT(optixPipelineCreate(optixContext,
+    OPTIX_CHECK(optixPipelineCreate(optixContext,
       &pipelineCompileOptions,
       &pipelineLinkOptions,
       programGroups.data(),
       (int)programGroups.size(),
       log, &sizeof_log,
       &pipeline
-    ) == OPTIX_SUCCESS, log);
+    ));
+    if (sizeof_log > 1) PRINT(log);
 
-    ALALBA_CORE_ASSERT(optixPipelineSetStackSize
+    OPTIX_CHECK(optixPipelineSetStackSize
     (/* [in] The pipeline to configure the stack size for */
       pipeline,
       /* [in] The direct stack size requirement for direct
@@ -263,12 +310,13 @@ namespace Alalba {
       2 * 1024,
       /* [in] The maximum depth of a traversable graph
          passed to trace. */
-      1) == OPTIX_SUCCESS, log);
+      1));
+    if (sizeof_log > 1) PRINT(log);
   }
 
 
   /*! constructs the shader binding table */
-  void OptixLayer::buildSBT()
+  void SampleRenderer::buildSBT()
   {
     // ------------------------------------------------------------------
     // build raygen records
@@ -276,25 +324,12 @@ namespace Alalba {
     std::vector<RaygenRecord> raygenRecords;
     for (int i = 0; i < raygenPGs.size(); i++) {
       RaygenRecord rec;
-      ALALBA_CORE_ASSERT(optixSbtRecordPackHeader(raygenPGs[i], &rec)== OPTIX_SUCCESS,"SbtRecordPackHeader failed");
+      OPTIX_CHECK(optixSbtRecordPackHeader(raygenPGs[i], &rec));
       rec.data = nullptr; /* for now ... */
       raygenRecords.push_back(rec);
     }
-
-    ///raygenRecordsBuffer.alloc_and_upload(raygenRecords);
-    //1 Allocate the miss record on the device 
-    CUdeviceptr raygen_record;
-    size_t raygen_record_size = sizeof(RaygenRecord) * raygenPGs.size();
-    cudaMalloc(reinterpret_cast<void**>(&raygen_record), raygen_record_size);
-    //2 Now copy our host record to the device
-      cudaMemcpy(
-        reinterpret_cast<void*>(raygen_record),
-        raygenPGs.data(),
-        raygen_record_size,
-        cudaMemcpyHostToDevice);
-    sbt.raygenRecord = raygen_record;
-
-
+    raygenRecordsBuffer.alloc_and_upload(raygenRecords);
+    sbt.raygenRecord = raygenRecordsBuffer.d_pointer();
 
     // ------------------------------------------------------------------
     // build miss records
@@ -302,22 +337,12 @@ namespace Alalba {
     std::vector<MissRecord> missRecords;
     for (int i = 0; i < missPGs.size(); i++) {
       MissRecord rec;
-      ALALBA_CORE_ASSERT(optixSbtRecordPackHeader(missPGs[i], &rec) == OPTIX_SUCCESS,"");
+      OPTIX_CHECK(optixSbtRecordPackHeader(missPGs[i], &rec));
       rec.data = nullptr; /* for now ... */
       missRecords.push_back(rec);
     }
-    ///missRecordsBuffer.alloc_and_upload(missRecords);
-    //1 Allocate the miss record on the device 
-    CUdeviceptr miss_record;
-    size_t miss_record_size = sizeof(MissRecord) * missPGs.size();
-    cudaMalloc(reinterpret_cast<void**>(&miss_record), miss_record_size);
-    //2 Now copy our host record to the device
-    cudaMemcpy(
-      reinterpret_cast<void*>(miss_record),
-      missPGs.data(),
-      miss_record_size,
-      cudaMemcpyHostToDevice);
-    sbt.missRecordBase = miss_record;
+    missRecordsBuffer.alloc_and_upload(missRecords);
+    sbt.missRecordBase = missRecordsBuffer.d_pointer();
     sbt.missRecordStrideInBytes = sizeof(MissRecord);
     sbt.missRecordCount = (int)missRecords.size();
 
@@ -333,111 +358,66 @@ namespace Alalba {
     for (int i = 0; i < numObjects; i++) {
       int objectType = 0;
       HitgroupRecord rec;
-      ALALBA_CORE_ASSERT(optixSbtRecordPackHeader(hitgroupPGs[objectType], &rec) == OPTIX_SUCCESS,"");
+      OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[objectType], &rec));
       rec.objectID = i;
       hitgroupRecords.push_back(rec);
     }
-    ///hitgroupRecordsBuffer.alloc_and_upload(hitgroupRecords);
-     //1 Allocate the miss record on the device 
-    CUdeviceptr hitgroup_record;
-    size_t hitgroup_record_size = sizeof(HitgroupRecord) * hitgroupPGs.size();
-    cudaMalloc(reinterpret_cast<void**>(&hitgroup_record), hitgroup_record_size);
-    //2 Now copy our host record to the device
-    cudaMemcpy(
-      reinterpret_cast<void*>(hitgroup_record),
-      hitgroupPGs.data(),
-      hitgroup_record_size,
-      cudaMemcpyHostToDevice);
-    sbt.hitgroupRecordBase = hitgroup_record;
+    hitgroupRecordsBuffer.alloc_and_upload(hitgroupRecords);
+    sbt.hitgroupRecordBase = hitgroupRecordsBuffer.d_pointer();
     sbt.hitgroupRecordStrideInBytes = sizeof(HitgroupRecord);
     sbt.hitgroupRecordCount = (int)hitgroupRecords.size();
   }
 
 
-  void OptixLayer::OnAttach()
+
+  /*! render one frame */
+  void SampleRenderer::render()
   {
-    ALALBA_CORE_TRACE("initializing optix...");
-    this->initOptix();
+    // sanity check: make sure we launch only after first resize is
+    // already done:
+    if (launchParams.fbSize.x == 0) return;
 
-    ALALBA_CORE_TRACE("creating optix context ...");
-    this->createContext();
-
-    ALALBA_CORE_TRACE("setting up module ...");
-    this->createModule();
-
-    ALALBA_CORE_TRACE("creating raygen programs ...");
-    this->createRaygenPrograms();
-    ALALBA_CORE_TRACE("creating miss programs ...");
-    this->createMissPrograms();
-    ALALBA_CORE_TRACE("creating hitgroup programs ...");
-    this->createHitgroupPrograms();
-
-
-    ALALBA_CORE_TRACE("setting up optix pipeline ...");
-    this->createPipeline();
-
-    ALALBA_CORE_TRACE("building SBT ...");
-    this->buildSBT();
-
-  }
-
-  void OptixLayer::OnUpdate()
-  {
-    // resize
-    launchParams.image_height = 1024;
-    launchParams.image_width = 1200;
-    if (colorBuffer)
-    {
-      cudaFree((void*)colorBuffer);
-    }
-    cudaMalloc(reinterpret_cast<void**>(&colorBuffer), launchParams.image_height * 
-                                                       launchParams.image_width * 
-                                                       sizeof(uint32_t));
-    launchParams.colorBuffer = (uint32_t*)colorBuffer;
-
-    //
-
-    cudaMemcpy(
-      reinterpret_cast<void*>(launchParamsBuffer),
-      &launchParams,
-      sizeof(LaunchParams),
-      cudaMemcpyHostToDevice);
+    launchParamsBuffer.upload(&launchParams, 1);
     launchParams.frameID++;
 
-    ALALBA_CORE_ASSERT(optixLaunch(/*! pipeline we're launching launch: */
+    OPTIX_CHECK(optixLaunch(/*! pipeline we're launching launch: */
       pipeline, stream,
       /*! parameters and SBT */
-      launchParamsBuffer,
-      sizeof(LaunchParams),
+      launchParamsBuffer.d_pointer(),
+      launchParamsBuffer.sizeInBytes,
       &sbt,
       /*! dimensions of the launch: */
-      1200,
-      1024,
+      launchParams.fbSize.x,
+      launchParams.fbSize.y,
       1
-    ) == OPTIX_SUCCESS, "optixLaunch failed");
-    cudaDeviceSynchronize();
-    
-    // download back to host
-    std::vector<uint32_t> pixels(1200 * 1024);
-    cudaMemcpy(
-      pixels.data(),
-      (void*)colorBuffer,
-      1200 * 1024 * sizeof(uint32_t),
-      cudaMemcpyDeviceToHost);
-    
-    const std::string fileName = "osc_example2.png";
-    stbi_write_png(fileName.c_str(), 1200, 1024, 4,
-      pixels.data(), 1200 * sizeof(uint32_t));
-
+    ));
+    // sync - make sure the frame is rendered before we download and
+    // display (obviously, for a high-performance application you
+    // want to use streams and double-buffering, but for this simple
+    // example, this will have to do)
+    CUDA_SYNC_CHECK();
   }
-  void OptixLayer::OnDetach()
+
+  /*! resize frame buffer to given resolution */
+  void SampleRenderer::resize(const vec2i& newSize)
   {
+    // if window minimized
+    if (newSize.x == 0 | newSize.y == 0) return;
 
+    // resize our cuda frame buffer
+    colorBuffer.resize(newSize.x * newSize.y * sizeof(uint32_t));
+
+    // update the launch parameters that we'll pass to the optix
+    // launch:
+    launchParams.fbSize = newSize;
+    launchParams.colorBuffer = (uint32_t*)colorBuffer.d_ptr;
   }
-  void OptixLayer::OnImGuiRender()
+
+  /*! download the rendered color buffer */
+  void SampleRenderer::downloadPixels(uint32_t h_pixels[])
   {
-
+    colorBuffer.download(h_pixels,
+      launchParams.fbSize.x * launchParams.fbSize.y);
   }
 
-
-}
+} // ::osc

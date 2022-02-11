@@ -14,17 +14,7 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
-#pragma once
+#include "gdt.h"
+#include "math/LinearSpace.h"
+#include "math/AffineSpace.h"
 
-#include "math/vec.h"
-
-namespace Alalba {
-  using namespace gdt;
-  struct LaunchParams
-  {
-    int       frameID{ 0 };
-    uint32_t* colorBuffer;
-    vec2i     fbSize;
-  };
-
-} // ::osc

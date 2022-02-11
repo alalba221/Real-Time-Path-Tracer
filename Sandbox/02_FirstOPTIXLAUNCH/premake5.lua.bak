@@ -36,7 +36,7 @@ local SOURCE_DIR = "source/*"
 	postbuildcommands
     {
 			--("{COPY} %{cfg.buildtarget.relpath} ../bin/"..outputdir.."/Sandbox")
-			("{COPY} assets  ../bin/" ..outputdir .. "/%{prj.name}")
+			("{COPY} assets  %{wks.location}/bin/" ..outputdir .. "/%{prj.name}")
     }
 			
 -- add settings common to all project

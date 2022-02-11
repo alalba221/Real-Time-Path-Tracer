@@ -22,11 +22,13 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 	IncludeDir["Glad"] = "%{wks.location}/Alalba/vendor/Glad/include"
 	IncludeDir["ImGui"] = "%{wks.location}/Alalba/vendor/imgui"
 	IncludeDir["glm"] = "%{wks.location}/Alalba/vendor/glm"
+	IncludeDir["gdt"] = "%{wks.location}/Alalba/vendor/gdt/source"
 
 group"Dependencies"
 	include "Alalba/vendor/GLFW"
 	include "Alalba/vendor/Glad"
 	include "Alalba/vendor/imgui"
+	include "Alalba/vendor/gdt"
 group""
 
 project "Alalba"
@@ -68,6 +70,7 @@ project "Alalba"
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
+		"%{IncludeDir.gdt}",
 		"%{prj.location}/vendor/stb/include",
 		"%{prj.location}/vendor/assimp/include",
 		CUDA_INCLUDE_DIR,
@@ -79,6 +82,7 @@ project "Alalba"
 		"GLFW",
 		"Glad",
 		"ImGui",
+		"gdt",
 		"opengl32.lib"
 	}
 
