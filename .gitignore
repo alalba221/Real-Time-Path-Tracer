@@ -9,3 +9,6 @@
 **/Makefile
 *.make
 **/imgui.ini
+**.bak
+**.sln
+**.vcxproj
