@@ -28,7 +28,7 @@
 		--MODULE_DIR,
 		CUDA_INCLUDE_DIR,
 		CUDA_EXTRA_DIR,
-		OPTIX7_INCLUDE_DIR
+		OPTIX7_INCLUDE_DIR,
 		VENDOR_DIR.."gdt/source"
 		
 		-- THIRD_PARTY_DIR,
@@ -106,3 +106,4 @@
 				  --THIRD_PARTY_DIR .. "precompiled/bin/" .. outputdir .. "/**",
 				  CUDA_LIB_DIR
 		}
+	print("AAAAAAAAAAAAAAAAAA")

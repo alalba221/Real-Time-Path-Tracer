@@ -83,7 +83,9 @@ project "Alalba"
 		"Glad",
 		"ImGui",
 		"gdt",
-		"opengl32.lib"
+		"opengl32.lib",
+		--"cuda",
+		--"nvrtc",
 	}
 
 	filter "system:windows"

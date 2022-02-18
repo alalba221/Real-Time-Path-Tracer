@@ -18,6 +18,7 @@
 // this include may only appear in a single source file:
 #include <optix_function_table_definition.h>
 
+
 /*! \namespace osc - Optix Siggraph Course */
 namespace Alalba {
 
@@ -182,6 +183,8 @@ namespace Alalba {
 
     //const std::string ptxCode = embedded_ptx_code;
     const std::string ptxCode = readPTX("assets/deviceCode.ptx");
+    
+
     char log[2048];
     size_t sizeof_log = sizeof(log);
     OPTIX_CHECK(optixModuleCreateFromPTX(optixContext,
