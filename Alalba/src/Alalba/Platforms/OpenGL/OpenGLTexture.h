@@ -21,6 +21,8 @@ namespace Alalba {
 		virtual const std::string& GetPath() const override { return m_FilePath; }
 
 		virtual RendererID GetRendererID() const override { return m_RendererID; }
+
+		virtual void ReloadFromMemory(unsigned char* data) override;
 	private:
 		RendererID m_RendererID;
 		TextureFormat m_Format;

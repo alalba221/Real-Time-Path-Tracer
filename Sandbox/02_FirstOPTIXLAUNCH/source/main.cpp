@@ -1,9 +1,49 @@
 #include "Alalba.h"
 #include "stb/include/stb_image_write.h"
 #include "Alalba/Core/Application.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/quaternion.hpp>
 using namespace Alalba;
 using namespace gdt;
+using namespace glm;
+
+
+class OptixLayer : public Alalba::Layer 
+{
+public:
+  OptixLayer()
+    :Layer("OptixLayer"),
+    m_Camera(glm::perspectiveFov(glm::radians(45.0f), 1280 * 2.0f, 720 * 2.0f, 0.1f, 10000.0f))
+  {}
+  virtual ~OptixLayer() {}
+  virtual void OnAttach() override
+  {
+  }
+  virtual void OnDetach() override
+  {
+    //dump
+  }
+  void OnUpdate() override
+  {
+  }
+  virtual void OnImGuiRender() override
+  {
+  }
+  void OnEvent(Alalba::Event& event) override
+  {
+    // dump
+  }
+private:
+  Alalba::Camera m_Camera;
+  std::unique_ptr<Alalba::Texture2D> m_OptixResult;
+  std::unique_ptr<Alalba::SampleRenderer> m_sample;
+
+};
+
 
 class Sandbox02 : public Alalba::Application {
 

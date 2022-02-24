@@ -127,6 +127,31 @@ namespace Alalba {
 		});
 	}
 
+	void OpenGLTexture2D::ReloadFromMemory(unsigned char* data)
+	{
+		auto self = this;
+		ALALBA_RENDER_2(self, data, {
+			if (self->m_RendererID)
+			{
+				glDeleteTextures(1, &self->m_RendererID);
+				self->m_RendererID = 0;
+			}
+			glGenTextures(1, &self->m_RendererID);
+			glBindTexture(GL_TEXTURE_2D, self->m_RendererID);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			//glTextureParameterf(self->m_RendererID, GL_TEXTURE_MAX_ANISOTROPY, RendererAPI::GetCapabilities().MaxAnisotropy);
+
+			//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, self->m_Width, self->m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, self->m_ImageData);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, self->m_Width, self->m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			//glGenerateMipmap(GL_TEXTURE_2D);
+			//glBindTexture(GL_TEXTURE_2D, 0);
+										});
+	}
+
 	//////////////////////////////////////////////////////////////////////////////////
 	// TextureCube
 	//////////////////////////////////////////////////////////////////////////////////
