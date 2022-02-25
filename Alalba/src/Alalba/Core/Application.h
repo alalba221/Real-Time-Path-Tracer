@@ -22,7 +22,7 @@ namespace Alalba{
 
 		void PushLayer(Layer* layer);
 		void PushOverlayer(Layer* overlayer);
-		void RenderImGui();
+		virtual void RenderImGui();
 
 		std::string OpenFile(const std::string& filter) const;
 

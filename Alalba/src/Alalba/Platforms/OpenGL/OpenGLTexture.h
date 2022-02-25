@@ -22,7 +22,7 @@ namespace Alalba {
 
 		virtual RendererID GetRendererID() const override { return m_RendererID; }
 
-		virtual void ReloadFromMemory(unsigned char* data) override;
+		virtual void ReloadFromMemory(unsigned char* data, unsigned int width, unsigned int height) override;
 	private:
 		RendererID m_RendererID;
 		TextureFormat m_Format;

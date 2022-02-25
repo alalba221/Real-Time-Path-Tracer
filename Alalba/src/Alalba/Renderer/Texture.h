@@ -29,7 +29,7 @@ namespace Alalba {
 		virtual unsigned int GetWidth() const = 0;
 		virtual unsigned int GetHeight() const = 0;
 		// reload RGBA format, this function is for Optix by now
-		virtual void ReloadFromMemory(unsigned char* data) = 0;
+		virtual void ReloadFromMemory(unsigned char* data, unsigned int width, unsigned int height) = 0;
 	
 		virtual const std::string& GetPath() const = 0;
 	};

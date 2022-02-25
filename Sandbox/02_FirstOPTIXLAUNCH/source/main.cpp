@@ -22,6 +22,47 @@ public:
   virtual ~OptixLayer() {}
   virtual void OnAttach() override
   {
+    // optix
+    fbSize = vec2i(1280 * 2.0f, 720 * 2.0f);
+    sample.resize(fbSize);
+    pixels.resize(fbSize.x * fbSize.y);
+    sample.render();
+    sample.downloadPixels(pixels.data());
+    // opengl
+    m_FinalPresentBuffer.reset(Alalba::FrameBuffer::Create(fbSize.x, fbSize.y, Alalba::FrameBufferFormat::RGBA8));
+    m_Shader.reset(Alalba::Shader::Create("assets/shaders/shader.glsl"));
+    // Create Quad
+    float x = -1, y = -1;
+    float width = 2, height = 2;
+    struct QuadVertex
+    {
+      glm::vec3 Position;
+      glm::vec2 TexCoord;
+    };
+    QuadVertex* data = new QuadVertex[4];
+    data[0].Position = glm::vec3(x, y, 0);
+    data[0].TexCoord = glm::vec2(0, 0);
+
+    data[1].Position = glm::vec3(x + width, y, 0);
+    data[1].TexCoord = glm::vec2(1, 0);
+
+    data[2].Position = glm::vec3(x + width, y + height, 0);
+    data[2].TexCoord = glm::vec2(1, 1);
+
+    data[3].Position = glm::vec3(x, y + height, 0);
+    data[3].TexCoord = glm::vec2(0, 1);
+
+    m_VertexBuffer.reset(Alalba::VertexBuffer::Create());
+    m_VertexBuffer->SetData(data, 4 * sizeof(QuadVertex));
+
+    uint32_t* indices = new uint32_t[6]{ 0, 1, 2, 2, 3, 0, };
+    m_IndexBuffer.reset(Alalba::IndexBuffer::Create());
+    m_IndexBuffer->SetData(indices, 6 * sizeof(unsigned int));
+
+    // create an empty texture
+    m_OptixResult.reset(Alalba::Texture2D::Create(TextureFormat::RGBA, fbSize.x, fbSize.y));
+    //m_OptixResult.reset(Alalba::Texture2D::Create("assets/awesomeface.png"));
+
   }
   virtual void OnDetach() override
   {
@@ -29,6 +70,25 @@ public:
   }
   void OnUpdate() override
   {
+    // update render data
+    sample.render();
+    /*pixels.clear();
+    pixels.resize(fbSize.x * fbSize.y);*/
+    sample.downloadPixels(pixels.data());
+
+   // 
+
+    Alalba::Renderer::Clear(0.2f, 0.3f, 0.8f, 1.0f);
+    //m_OptixResult.reset(Alalba::Texture2D::Create("osc_example2.png"));
+    m_OptixResult->ReloadFromMemory((unsigned char*)pixels.data(), fbSize.x, fbSize.y);
+    m_Shader->Bind();
+    m_OptixResult->Bind(0);
+    m_VertexBuffer->Bind();
+    m_IndexBuffer->Bind();
+    Alalba::Renderer::DrawIndexed(m_IndexBuffer->GetCount(), false);
+
+
+
   }
   virtual void OnImGuiRender() override
   {
@@ -40,40 +100,33 @@ public:
 private:
   Alalba::Camera m_Camera;
   std::unique_ptr<Alalba::Texture2D> m_OptixResult;
-  std::unique_ptr<Alalba::SampleRenderer> m_sample;
+  //std::unique_ptr<Alalba::SampleRenderer> m_sample;
 
+  std::unique_ptr<Alalba::Shader> m_Shader;
+  std::unique_ptr<Alalba::FrameBuffer> m_FrameBuffer, m_FinalPresentBuffer;
+
+  std::unique_ptr<Alalba::VertexBuffer> m_VertexBuffer;
+  std::unique_ptr<Alalba::IndexBuffer> m_IndexBuffer;
+  SampleRenderer sample;
+
+  vec2i fbSize;
+  std::vector<uint32_t> pixels;
 };
 
 
 class Sandbox02 : public Alalba::Application {
 
-
 public:
+
 	Sandbox02()
 	{
 		// PushLayer(new ExampLayer());
-		//PushLayer(new Alalba::OptixLayer());
+		PushLayer(new OptixLayer());
 	};
 	~Sandbox02() {};
-	void OnInit() override
-	{
-    SampleRenderer sample;
-
-    const vec2i fbSize(vec2i(1200, 1024));
-    sample.resize(fbSize);
-    sample.render();
-
-    std::vector<uint32_t> pixels(fbSize.x * fbSize.y);
-    sample.downloadPixels(pixels.data());
-
-    const std::string fileName = "osc_example2.png";
-    stbi_write_png(fileName.c_str(), fbSize.x, fbSize.y, 4,
-      pixels.data(), fbSize.x * sizeof(uint32_t));
-    std::cout << GDT_TERMINAL_GREEN
-      << std::endl
-      << "Image rendered, and saved to " << fileName << " ... done." << std::endl
-      << GDT_TERMINAL_DEFAULT
-      << std::endl;
+  void RenderImGui() override
+  {
+    ALALBA_CORE_INFO("render");
   }
 };
 Alalba::Application* Alalba::CreateApplication() {

@@ -73,7 +73,6 @@ namespace Alalba{
 			layer->OnImGuiRender();
 
 		m_ImGuiLayer->End();
-
 	}
 
 	bool Application::OnWindowResize(WindowResizeEvent& e)
