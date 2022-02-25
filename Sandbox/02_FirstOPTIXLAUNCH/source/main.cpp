@@ -126,7 +126,7 @@ public:
 	~Sandbox02() {};
   void RenderImGui() override
   {
-    ALALBA_CORE_INFO("render");
+    
   }
 };
 Alalba::Application* Alalba::CreateApplication() {
