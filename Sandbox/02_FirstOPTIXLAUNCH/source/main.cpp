@@ -15,9 +15,10 @@ using namespace glm;
 class OptixLayer : public Alalba::Layer 
 {
 public:
-  OptixLayer()
+  OptixLayer(const TriangleMesh& model)
     :Layer("OptixLayer"),
-    m_Camera(glm::perspectiveFov(glm::radians(45.0f), 1280 * 2.0f, 720 * 2.0f, 0.1f, 10000.0f))
+    m_Camera(glm::perspectiveFov(glm::radians(45.0f), 1280 * 2.0f, 720 * 2.0f, 0.1f, 10000.0f)),
+    sample(model)
   {}
   virtual ~OptixLayer() {}
   virtual void OnAttach() override
@@ -25,11 +26,11 @@ public:
     // optix
     fbSize = vec2i(1280 * 2.0f, 720 * 2.0f);
     sample.resize(fbSize);
-    pixels.resize(fbSize.x * fbSize.y);
+    pixels.resize(1280 * 2.0f * 720 * 2.0f);
     sample.render();
     sample.downloadPixels(pixels.data());
     // opengl
-    m_FinalPresentBuffer.reset(Alalba::FrameBuffer::Create(fbSize.x, fbSize.y, Alalba::FrameBufferFormat::RGBA8));
+    m_FinalPresentBuffer.reset(Alalba::FrameBuffer::Create(1280 * 2, 720 * 2, Alalba::FrameBufferFormat::RGBA8));
     m_Shader.reset(Alalba::Shader::Create("assets/shaders/shader.glsl"));
     // Create Quad
     float x = -1, y = -1;
@@ -60,7 +61,7 @@ public:
     m_IndexBuffer->SetData(indices, 6 * sizeof(unsigned int));
 
     // create an empty texture
-    m_OptixResult.reset(Alalba::Texture2D::Create(TextureFormat::RGBA, fbSize.x, fbSize.y));
+    m_OptixResult.reset(Alalba::Texture2D::Create(TextureFormat::RGBA, 1280 * 2, 720 * 2));
     //m_OptixResult.reset(Alalba::Texture2D::Create("assets/awesomeface.png"));
 
   }
@@ -70,6 +71,12 @@ public:
   }
   void OnUpdate() override
   {
+    /// Cam test
+    sample.setRT_Camera(RT_Camera{  /*from*/vec3f(-10.f,2.f,-12.f),
+                                    /* at */vec3f(0.f,0.f,0.f),
+                                    /* up */vec3f(0.f,1.f,0.f) }
+    );
+
     // update render data
     sample.render();
     /*pixels.clear();
@@ -80,7 +87,7 @@ public:
 
     Alalba::Renderer::Clear(0.2f, 0.3f, 0.8f, 1.0f);
     //m_OptixResult.reset(Alalba::Texture2D::Create("osc_example2.png"));
-    m_OptixResult->ReloadFromMemory((unsigned char*)pixels.data(), fbSize.x, fbSize.y);
+    m_OptixResult->ReloadFromMemory((unsigned char*)pixels.data(), 1280 * 2, 720 * 2);
     m_Shader->Bind();
     m_OptixResult->Bind(0);
     m_VertexBuffer->Bind();
@@ -120,8 +127,14 @@ public:
 
 	Sandbox02()
 	{
+    TriangleMesh model;
+    // 100x100 thin ground plane
+    model.addCube(vec3f(0.f, -1.5f, 0.f), vec3f(10.f, .1f, 10.f));
+    // a unit cube centered on top of that
+    model.addCube(vec3f(0.f, 0.f, 0.f), vec3f(2.f, 2.f, 2.f));
+
 		// PushLayer(new ExampLayer());
-		PushLayer(new OptixLayer());
+		PushLayer(new OptixLayer(model));
 	};
 	~Sandbox02() {};
   void RenderImGui() override

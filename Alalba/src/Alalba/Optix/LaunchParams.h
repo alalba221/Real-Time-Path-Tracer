@@ -22,9 +22,19 @@ namespace Alalba {
   using namespace gdt;
   struct LaunchParams
   {
-    int       frameID{ 0 };
-    uint32_t* colorBuffer;
-    vec2i     fbSize;
+    struct {
+      uint32_t* colorBuffer;
+      vec2i     size;
+    } frame;
+
+    struct {
+      vec3f position;
+      vec3f direction;
+      vec3f horizontal;
+      vec3f vertical;
+    } camera;
+
+    OptixTraversableHandle traversable;
   };
 
 } // ::osc
