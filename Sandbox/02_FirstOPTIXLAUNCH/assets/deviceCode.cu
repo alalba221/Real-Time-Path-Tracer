@@ -23,7 +23,7 @@ namespace Alalba {
     void* ptr = reinterpret_cast<void*>(uptr);
     return ptr;
   }
-
+  
   static __forceinline__ __device__
     void  packPointer(void* ptr, uint32_t& i0, uint32_t& i1)
   {
@@ -53,8 +53,8 @@ namespace Alalba {
   extern "C" __global__ void __closesthit__radiance()
   { 
     const int   primID = optixGetPrimitiveIndex();
-    vec3f& prd = *(vec3f*)getPRD<vec3f>();
-    prd = gdt::randomColor(primID);
+    float3& prd = *(float3*)getPRD<vec3f>();
+    prd = randomColor(primID);
   }
 
   extern "C" __global__ void __anyhit__radiance()

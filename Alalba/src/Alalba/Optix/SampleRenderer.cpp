@@ -18,7 +18,6 @@
 // this include may only appear in a single source file:
 #include <optix_function_table_definition.h>
 
-
 /*! \namespace osc - Optix Siggraph Course */
 namespace Alalba {
 
@@ -117,6 +116,9 @@ namespace Alalba {
   /*! constructor - performs all setup, including initializing
     optix, creates module, pipeline, programs, SBT, etc. */
   SampleRenderer::SampleRenderer(const TriangleMesh& model)
+    :lastSetCamera(Camera(  /*from*/glm::vec3(-10.f, 2.f, -12.f),
+      /* at */glm::vec3(0.f, 0.f, 0.f),
+      /* up */glm::vec3(0.f, 1.f, 0.f)))
   {
     initOptix();
 
@@ -567,26 +569,31 @@ namespace Alalba {
   }
 
   /*! set camera to render with */
-  void SampleRenderer::setRT_Camera(const RT_Camera& camera)
+  void SampleRenderer::setCamera(const Camera& camera)
   {
-    lastSetRT_Camera = camera;
-    launchParams.camera.position = camera.from;
-    launchParams.camera.direction = normalize(camera.at - camera.from);
+    lastSetCamera = camera;
+    launchParams.camera.position = vec3f(camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
+    
+    glm::vec3 dirction = lastSetCamera.GetForwardDirection();
+    
+    launchParams.camera.direction = vec3f(dirction.x, dirction.y, dirction.z);
     const float cosFovy = 0.66f;
     const float aspect = launchParams.frame.size.x / float(launchParams.frame.size.y);
+    
+    glm::vec3 horizontal = lastSetCamera.GetRightDirection();
     launchParams.camera.horizontal
-      = cosFovy * aspect * normalize(cross(launchParams.camera.direction,
-        camera.up));
+      = cosFovy * aspect * vec3f(horizontal.x, horizontal.y, horizontal.z);
+    
+    glm::vec3 vertical = lastSetCamera.GetUpDirection();
     launchParams.camera.vertical
-      = cosFovy * normalize(cross(launchParams.camera.horizontal,
-        launchParams.camera.direction));
+      = cosFovy * vec3f(vertical.x, vertical.y, vertical.z);
   }
 
   /*! resize frame buffer to given resolution */
   void SampleRenderer::resize(const vec2i& newSize)
   {
     // if window minimized
-    if (newSize.x == 0 | newSize.y == 0) return;
+    if (newSize.x == 0 || newSize.y == 0) return;
     // resize our cuda frame buffer
     colorBuffer.resize(newSize.x * newSize.y * sizeof(uint32_t));
 
@@ -596,9 +603,8 @@ namespace Alalba {
     launchParams.frame.colorBuffer = (uint32_t*)colorBuffer.d_pointer();
 
     // and re-set the camera, since aspect may have changed
-    setRT_Camera(lastSetRT_Camera);
+    setCamera(lastSetCamera);
   }
-
   /*! download the rendered color buffer */
   void SampleRenderer::downloadPixels(uint32_t h_pixels[])
   {

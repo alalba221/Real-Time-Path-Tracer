@@ -23,6 +23,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 	IncludeDir["ImGui"] = "%{wks.location}/Alalba/vendor/imgui"
 	IncludeDir["glm"] = "%{wks.location}/Alalba/vendor/glm"
 	IncludeDir["gdt"] = "%{wks.location}/Alalba/vendor/gdt/source"
+	IncludeDir["eigen"] = "%{wks.location}/Alalba/vendor/eigen"
 
 group"Dependencies"
 	include "Alalba/vendor/GLFW"
@@ -49,7 +50,8 @@ project "Alalba"
 		"%{prj.name}/src/**.h",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/src/**.cpp",
-		"%{prj.name}/vendor/glm/glm/**.inl"
+		"%{prj.name}/vendor/glm/glm/**.inl",
+		"%{prj.name}/vendor/eigen/**"
 	}
 	defines
 	{
@@ -70,6 +72,7 @@ project "Alalba"
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
+		"%{IncludeDir.eigen}",
 		"%{IncludeDir.gdt}",
 		"%{prj.location}/vendor/stb/include",
 		"%{prj.location}/vendor/assimp/include",

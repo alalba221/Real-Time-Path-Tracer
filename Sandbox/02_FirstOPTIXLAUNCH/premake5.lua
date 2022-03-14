@@ -30,6 +30,7 @@ local SOURCE_DIR = "source/*"
 		"%{wks.location}/Alalba/src",
 		"%{wks.location}/Alalba/vendor",
 		"%{IncludeDir.glm}",
+		"%{IncludeDir.eigen}",
 
 		--"%{wks.location}/Alalba/vendor",
 
@@ -41,9 +42,23 @@ local SOURCE_DIR = "source/*"
 			--("{COPY} assets  %{wks.location}/bin/" ..outputdir .. "/%{prj.name}")
     }
 
---os.execute 'nvcc assets\deviceCode.cu -ptx -ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.30.30705\bin\Hostx64\x64" --gpu-architecture=compute_52 --use_fast_math --relocatable-device-code=true -I"C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0\include" -I"C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0\SDK" -I"C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0\SDK\cuda" -I"D:\Study\Alalba\Alalba\src\Alalba\Optix" -I"D:\Study\Alalba\Alalba\vendor\gdt\source\math" -I"D:\Study\Alalba\Alalba\vendor\gdt\source" -I"D:\Study\Alalba\Alalba\src" -o assets\deviceCode.ptx'
+
 -- add settings common to all project
---os.execute('nvcc assets\deviceCode.cu -ptx -ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.30.30705\bin\Hostx64\x64" --gpu-architecture=compute_52 --use_fast_math --relocatable-device-code=true -I"C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0\include" -I"C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0\SDK" -I"C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0\SDK\cuda" -I"D:\Study\Alalba\Alalba\src\Alalba\Optix" -I"D:\Study\Alalba\Alalba\vendor\gdt\source\math" -I"D:\Study\Alalba\Alalba\vendor\gdt\source" -I"D:\Study\Alalba\Alalba\src" -o assets\deviceCode.ptx')
-os.execute('nvcc assets\\deviceCode.cu -ptx -ccbin "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.30.30705\\bin\\Hostx64\\x64" --gpu-architecture=compute_52 --use_fast_math --relocatable-device-code=true -I"C:\\ProgramData\\NVIDIA Corporation\\OptiX SDK 7.4.0\\include" -I"C:\\ProgramData\\NVIDIA Corporation\\OptiX SDK 7.4.0\\SDK" -I"C:\\ProgramData\\NVIDIA Corporation\\OptiX SDK 7.4.0\\SDK\\cuda" -I"D:\\Study\\Alalba\\Alalba\\src\\Alalba\\Optix" -I"D:\\Study\\Alalba\\Alalba\\vendor\\gdt\\source\\math" -I"D:\\Study\\Alalba\\Alalba\\vendor\\gdt\\source" -I"D:\\Study\\Alalba\\Alalba\\src" -o assets\\deviceCode.ptx')
+
+os.execute('nvcc assets\\deviceCode.cu -ptx -ccbin \z
+			"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.30.30705\\bin\\Hostx64\\x64" \z 
+			--gpu-architecture=compute_52 \z
+			--use_fast_math \z
+			--relocatable-device-code=true \z
+			--expt-relaxed-constexpr \z
+			-I"C:\\ProgramData\\NVIDIA Corporation\\OptiX SDK 7.4.0\\include" \z
+			-I"C:\\ProgramData\\NVIDIA Corporation\\OptiX SDK 7.4.0\\SDK" \z
+			-I"C:\\ProgramData\\NVIDIA Corporation\\OptiX SDK 7.4.0\\SDK\\cuda" \z
+			-I"D:\\Study\\Alalba\\Alalba\\src\\Alalba\\Optix" \z
+			-I"D:\\Study\\Alalba\\Alalba\\vendor\\gdt\\source\\math" \z
+			-I"D:\\Study\\Alalba\\Alalba\\vendor\\gdt\\source" \z
+			-I"D:\\Study\\Alalba\\Alalba\\src" \z
+			-I"D:\\Study\\Alalba\\Alalba\\vendor\\eigen" \z
+			-o assets\\deviceCode.ptx')
 --os.execute('nvcc --version')
 dofile("../optix.lua")

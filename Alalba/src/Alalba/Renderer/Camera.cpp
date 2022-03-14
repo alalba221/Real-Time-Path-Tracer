@@ -32,6 +32,25 @@ namespace Alalba {
 
 	}
 
+	Camera::Camera(const glm::vec3& from, const glm::vec3& at, const glm::vec3& up)
+	{
+		// Sensible defaults
+		m_PanSpeed = 0.0015f;
+		m_RotationSpeed = 0.002f;
+		m_ZoomSpeed = 0.2f;
+
+		
+		m_Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+		
+		m_Position = from;
+		m_FocalPoint = at;
+		m_Up = up;
+		m_Distance = glm::distance(m_Position, m_FocalPoint);
+
+		m_Yaw = 0;
+		m_Pitch = 0;
+	}
+
 	void Camera::Focus()
 	{
 	}
@@ -111,5 +130,6 @@ namespace Alalba {
 	{
 		return glm::quat(glm::vec3(-m_Pitch, -m_Yaw, 0.0f));
 	}
+
 }
 

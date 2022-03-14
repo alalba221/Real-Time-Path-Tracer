@@ -15,16 +15,14 @@
 // ======================================================================== //
 
 #pragma once
-
 #include "math/vec.h"
-
 namespace Alalba {
   using namespace gdt;
   struct LaunchParams
   {
     struct {
       uint32_t* colorBuffer;
-      vec2i     size;
+      vec2i size;
     } frame;
 
     struct {

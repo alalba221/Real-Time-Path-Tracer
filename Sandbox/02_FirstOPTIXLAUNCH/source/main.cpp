@@ -7,6 +7,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/quaternion.hpp>
+
 using namespace Alalba;
 using namespace gdt;
 using namespace glm;
@@ -17,7 +18,7 @@ class OptixLayer : public Alalba::Layer
 public:
   OptixLayer(const TriangleMesh& model)
     :Layer("OptixLayer"),
-    m_Camera(glm::perspectiveFov(glm::radians(45.0f), 1280 * 2.0f, 720 * 2.0f, 0.1f, 10000.0f)),
+    m_Camera(glm::vec3(-10.f, 2.f, -12.f), glm::vec3(0.f,0.f,0.f),glm::vec3(0.f,1.f,0.f)),
     sample(model)
   {}
   virtual ~OptixLayer() {}
@@ -26,7 +27,7 @@ public:
     // optix
     fbSize = vec2i(1280 * 2.0f, 720 * 2.0f);
     sample.resize(fbSize);
-    pixels.resize(1280 * 2.0f * 720 * 2.0f);
+    pixels.resize(1280 * 2 * 720 * 2);
     sample.render();
     sample.downloadPixels(pixels.data());
     // opengl
@@ -62,7 +63,7 @@ public:
 
     // create an empty texture
     m_OptixResult.reset(Alalba::Texture2D::Create(TextureFormat::RGBA, 1280 * 2, 720 * 2));
-    //m_OptixResult.reset(Alalba::Texture2D::Create("assets/awesomeface.png"));
+    
 
   }
   virtual void OnDetach() override
@@ -72,10 +73,9 @@ public:
   void OnUpdate() override
   {
     /// Cam test
-    sample.setRT_Camera(RT_Camera{  /*from*/vec3f(-10.f,2.f,-12.f),
-                                    /* at */vec3f(0.f,0.f,0.f),
-                                    /* up */vec3f(0.f,1.f,0.f) }
-    );
+    m_Camera.Update();
+    sample.setCamera(m_Camera);
+   
 
     // update render data
     sample.render();

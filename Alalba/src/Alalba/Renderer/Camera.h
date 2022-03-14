@@ -1,13 +1,14 @@
 #pragma once
 
 #include <glm/glm.hpp>
-
+// for gdt camera
 namespace Alalba {
 
 	class ALALBA_API Camera
 	{
 	public:
 		Camera(const glm::mat4& projectionMatrix);
+		Camera(const glm::vec3& from, const glm::vec3& at, const glm::vec3& up);
 
 		void Focus();
 		void Update();
@@ -33,7 +34,7 @@ namespace Alalba {
 		glm::quat GetOrientation();
 	private:
 		glm::mat4 m_ProjectionMatrix, m_ViewMatrix;
-		glm::vec3 m_Position, m_Rotation, m_FocalPoint;
+		glm::vec3 m_Position, m_Rotation, m_FocalPoint, m_Up;
 
 		bool m_Panning, m_Rotating;
 		glm::vec2 m_InitialMousePosition;

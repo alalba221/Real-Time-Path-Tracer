@@ -21,17 +21,18 @@
 #include "LaunchParams.h"
 // from gdt
 #include "math/AffineSpace.h"
+#include"Alalba/Renderer/Camera.h"
 /*! \namespace osc - Optix Siggraph Course */
 namespace Alalba {
 
-  struct RT_Camera {
-    /*! camera position - *from* where we are looking */
-    vec3f from;
-    /*! which point we are looking *at* */
-    vec3f at;
-    /*! general up-vector */
-    vec3f up;
-  };
+  //struct RT_Camera {
+  //  /*! camera position - *from* where we are looking */
+  //  vec3f from;
+  //  /*! which point we are looking *at* */
+  //  vec3f at;
+  //  /*! general up-vector */
+  //  vec3f up;
+  //};
 
   /*! a simple indexed triangle mesh that our sample renderer will
       render */
@@ -67,12 +68,11 @@ namespace Alalba {
 
     /*! resize frame buffer to given resolution */
     void resize(const vec2i& newSize);
-
     /*! download the rendered color buffer */
     void downloadPixels(uint32_t h_pixels[]);
 
     /*! set camera to render with */
-    void setRT_Camera(const RT_Camera& rt_camera);
+    void setCamera(const Camera& camera);
 
    protected:
     // ------------------------------------------------------------------
@@ -149,7 +149,7 @@ namespace Alalba {
     CUDABuffer colorBuffer;
 
     /*! the camera we are to render with. */
-    RT_Camera lastSetRT_Camera;
+    Camera lastSetCamera;
 
     /*! the model we are going to trace rays against */
     const TriangleMesh model;
