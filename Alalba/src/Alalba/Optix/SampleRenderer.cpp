@@ -70,7 +70,8 @@ namespace Alalba {
     __align__(OPTIX_SBT_RECORD_ALIGNMENT) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
     // just a dummy value - later examples will use more interesting
     // data here
-    int objectID;
+    TriangleMeshSBTData data;
+    //int objectID;
   };
 
   //! add aligned cube with front-lower-left corner and size
@@ -99,11 +100,11 @@ namespace Alalba {
 
 
     int indices[] = { 0,1,3, 2,3,0,
-                     5,7,6, 5,6,4,
-                     0,4,5, 0,5,1,
-                     2,3,7, 2,7,6,
-                     1,5,7, 1,7,3,
-                     4,0,2, 4,2,6
+                      5,7,6, 5,6,4,
+                      0,4,5, 0,5,1,
+                      2,3,7, 2,7,6,
+                      1,5,7, 1,7,3,
+                      4,0,2, 4,2,6
     };
     for (int i = 0; i < 12; i++)
       index.push_back(firstVertexID + vec3i(indices[3 * i + 0],
@@ -119,6 +120,7 @@ namespace Alalba {
     :lastSetCamera(Camera(  /*from*/glm::vec3(-10.f, 2.f, -12.f),
       /* at */glm::vec3(0.f, 0.f, 0.f),
       /* up */glm::vec3(0.f, 1.f, 0.f)))
+    ,model(model)
   {
     initOptix();
 
@@ -201,7 +203,7 @@ namespace Alalba {
       ;
     accelOptions.motionOptions.numKeys = 1;
     accelOptions.operation = OPTIX_BUILD_OPERATION_BUILD;
-
+    //1. ask builder for how much memory it needs ( temp and BVH)
     OptixAccelBufferSizes blasBufferSizes;
     OPTIX_CHECK(optixAccelComputeMemoryUsage
     (optixContext,
@@ -225,7 +227,7 @@ namespace Alalba {
     // ==================================================================
     // execute build (main stage)
     // ==================================================================
-
+    // 2. allocate memory for temp and BVH
     CUDABuffer tempBuffer;
     tempBuffer.alloc(blasBufferSizes.tempSizeInBytes);
 
@@ -445,6 +447,7 @@ namespace Alalba {
 
 
   /*! assembles the full pipeline of all programs */
+  // link shaders
   void SampleRenderer::createPipeline()
   {
     std::vector<OptixProgramGroup> programGroups;
@@ -529,7 +532,10 @@ namespace Alalba {
       int objectType = 0;
       HitgroupRecord rec;
       OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[objectType], &rec));
-      rec.objectID = i;
+      //rec.objectID = i;
+      rec.data.vertex = (vec3f*)vertexBuffer.d_pointer();
+      rec.data.index = (vec3i*)indexBuffer.d_pointer();
+      rec.data.color = model.color;
       hitgroupRecords.push_back(rec);
     }
     hitgroupRecordsBuffer.alloc_and_upload(hitgroupRecords);

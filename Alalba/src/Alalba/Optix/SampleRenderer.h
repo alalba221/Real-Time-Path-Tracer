@@ -46,6 +46,7 @@ namespace Alalba {
 
     std::vector<vec3f> vertex;
     std::vector<vec3i> index;
+    vec3f color;
   };
 
 

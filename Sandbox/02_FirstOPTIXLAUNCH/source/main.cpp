@@ -132,7 +132,7 @@ public:
     model.addCube(vec3f(0.f, -1.5f, 0.f), vec3f(10.f, .1f, 10.f));
     // a unit cube centered on top of that
     model.addCube(vec3f(0.f, 0.f, 0.f), vec3f(2.f, 2.f, 2.f));
-
+    model.color = vec3f(0.2f, 0.8f, 0.2f);
 		// PushLayer(new ExampLayer());
 		PushLayer(new OptixLayer(model));
 	};
