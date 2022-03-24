@@ -20,7 +20,7 @@
 #include "CUDABuffer.h"
 #include "LaunchParams.h"
 // from gdt
-#include "math/AffineSpace.h"
+#include "Model.h"
 #include"Alalba/Renderer/Camera.h"
 /*! \namespace osc - Optix Siggraph Course */
 namespace Alalba {
@@ -34,22 +34,6 @@ namespace Alalba {
   //  vec3f up;
   //};
 
-  /*! a simple indexed triangle mesh that our sample renderer will
-      render */
-  struct TriangleMesh {
-    /*! add a unit cube (subject to given xfm matrix) to the current
-        triangleMesh */
-    void addUnitCube(const affine3f& xfm);
-
-    //! add aligned cube aith front-lower-left corner and size
-    void addCube(const vec3f& center, const vec3f& size);
-
-    std::vector<vec3f> vertex;
-    std::vector<vec3i> index;
-    vec3f color;
-  };
-
-
   /*! a sample OptiX-7 renderer that demonstrates how to set up
       context, module, programs, pipeline, SBT, etc, and perform a
       valid launch that renders some pixel (using a simple test
@@ -62,7 +46,7 @@ namespace Alalba {
   public:
     /*! constructor - performs all setup, including initializing
       optix, creates module, pipeline, programs, SBT, etc. */
-    SampleRenderer(const std::vector<TriangleMesh>& meshes);
+    SampleRenderer(const Model* model);
 
     /*! render one frame */
     void render();
@@ -153,7 +137,7 @@ namespace Alalba {
     Camera lastSetCamera;
 
     /*! the model we are going to trace rays against */
-    std::vector<TriangleMesh> meshes;
+    const Model* model;
     /*! one buffer per input mesh */
     std::vector<CUDABuffer> vertexBuffer;
     /*! one buffer per input mesh */

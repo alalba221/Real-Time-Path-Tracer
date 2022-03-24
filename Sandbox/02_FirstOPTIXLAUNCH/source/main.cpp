@@ -16,10 +16,10 @@ using namespace glm;
 class OptixLayer : public Alalba::Layer 
 {
 public:
-  OptixLayer(const std::vector<TriangleMesh>& meshes)
+  OptixLayer(const Model* model)
     :Layer("OptixLayer"),
-    m_Camera(glm::vec3(-10.f, 2.f, -12.f), glm::vec3(0.f,0.f,0.f),glm::vec3(0.f,1.f,0.f)),
-    sample(meshes)
+    m_Camera(glm::vec3(-1293.07f, 154.681f, -0.7304f), glm::vec3(0.f,200.f,0.f),glm::vec3(0.f,1.f,0.f)),
+    sample(model)
   {}
   virtual ~OptixLayer() {}
   virtual void OnAttach() override
@@ -127,14 +127,9 @@ public:
 
 	Sandbox02()
 	{
-    std::vector<TriangleMesh> model(2);
-    // 100x100 thin ground plane
-    model[0].color = vec3f(0.f, 1.f, 0.f);
-    model[0].addCube(vec3f(0.f, -1.5f, 0.f), vec3f(10.f, .1f, 10.f));
-    // a unit cube centered on top of that
-    model[1].color = vec3f(0.f, 1.f, 1.f);
-    model[1].addCube(vec3f(0.f, 0.f, 0.f), vec3f(2.f, 2.f, 2.f));
-
+    Model* model = loadOBJ(
+      "assets/sponza/sponza.obj"
+    );
 		PushLayer(new OptixLayer(model));
 	};
 	~Sandbox02() {};

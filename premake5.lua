@@ -24,7 +24,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 	IncludeDir["glm"] = "%{wks.location}/Alalba/vendor/glm"
 	IncludeDir["gdt"] = "%{wks.location}/Alalba/vendor/gdt/source"
 	IncludeDir["eigen"] = "%{wks.location}/Alalba/vendor/eigen"
-
+	IncludeDir["tiny_obj_loader"] = "%{wks.location}/Alalba/vendor/tiny_obj_loader"
 group"Dependencies"
 	include "Alalba/vendor/GLFW"
 	include "Alalba/vendor/Glad"
@@ -51,7 +51,8 @@ project "Alalba"
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/src/**.cpp",
 		"%{prj.name}/vendor/glm/glm/**.inl",
-		"%{prj.name}/vendor/eigen/**"
+		"%{prj.name}/vendor/eigen/**",
+		"%{prj.name}/vendor/tiny_obj_loader/*.h"
 	}
 	defines
 	{
@@ -74,6 +75,7 @@ project "Alalba"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.eigen}",
 		"%{IncludeDir.gdt}",
+		"%{IncludeDir.tiny_obj_loader}",
 		"%{prj.location}/vendor/stb/include",
 		"%{prj.location}/vendor/assimp/include",
 		CUDA_INCLUDE_DIR,

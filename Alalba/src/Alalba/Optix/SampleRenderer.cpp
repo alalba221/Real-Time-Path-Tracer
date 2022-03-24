@@ -74,53 +74,14 @@ namespace Alalba {
     //int objectID;
   };
 
-  //! add aligned cube with front-lower-left corner and size
-  void TriangleMesh::addCube(const vec3f& center, const vec3f& size)
-  {
-    affine3f xfm;
-    xfm.p = center - 0.5f * size;
-    xfm.l.vx = vec3f(size.x, 0.f, 0.f);
-    xfm.l.vy = vec3f(0.f, size.y, 0.f);
-    xfm.l.vz = vec3f(0.f, 0.f, size.z);
-    addUnitCube(xfm);
-  }
-  /*! add a unit cube (subject to given xfm matrix) to the current
-      triangleMesh */
-  void TriangleMesh::addUnitCube(const affine3f& xfm)
-  {
-    int firstVertexID = (int)vertex.size();
-    vertex.push_back(xfmPoint(xfm, vec3f(0.f, 0.f, 0.f)));
-    vertex.push_back(xfmPoint(xfm, vec3f(1.f, 0.f, 0.f)));
-    vertex.push_back(xfmPoint(xfm, vec3f(0.f, 1.f, 0.f)));
-    vertex.push_back(xfmPoint(xfm, vec3f(1.f, 1.f, 0.f)));
-    vertex.push_back(xfmPoint(xfm, vec3f(0.f, 0.f, 1.f)));
-    vertex.push_back(xfmPoint(xfm, vec3f(1.f, 0.f, 1.f)));
-    vertex.push_back(xfmPoint(xfm, vec3f(0.f, 1.f, 1.f)));
-    vertex.push_back(xfmPoint(xfm, vec3f(1.f, 1.f, 1.f)));
-
-
-    int indices[] = { 0,1,3, 2,3,0,
-                      5,7,6, 5,6,4,
-                      0,4,5, 0,5,1,
-                      2,3,7, 2,7,6,
-                      1,5,7, 1,7,3,
-                      4,0,2, 4,2,6
-    };
-    for (int i = 0; i < 12; i++)
-      index.push_back(firstVertexID + vec3i(indices[3 * i + 0],
-        indices[3 * i + 1],
-        indices[3 * i + 2]));
-  }
-
-
-
+ 
   /*! constructor - performs all setup, including initializing
     optix, creates module, pipeline, programs, SBT, etc. */
-  SampleRenderer::SampleRenderer(const std::vector<TriangleMesh>& meshes)
+  SampleRenderer::SampleRenderer(const Model* model)
     :lastSetCamera(Camera(  /*from*/glm::vec3(-10.f, 2.f, -12.f),
       /* at */glm::vec3(0.f, 0.f, 0.f),
       /* up */glm::vec3(0.f, 1.f, 0.f)))
-    ,meshes(meshes)
+    ,model(model)
   {
     initOptix();
 
@@ -155,25 +116,27 @@ namespace Alalba {
 
   OptixTraversableHandle SampleRenderer::buildAccel()
   {
-    vertexBuffer.resize(meshes.size());
-    indexBuffer.resize(meshes.size());
+    PING;
+    PRINT(model->meshes.size());
+    vertexBuffer.resize(model->meshes.size());
+    indexBuffer.resize(model->meshes.size());
     
     OptixTraversableHandle asHandle{ 0 };
 
     // ==================================================================
     // triangle inputs
     // ==================================================================
-    std::vector<OptixBuildInput> triangleInput(meshes.size());
-    std::vector<CUdeviceptr> d_vertices(meshes.size());
-    std::vector<CUdeviceptr> d_indices(meshes.size());
-    std::vector<uint32_t> triangleInputFlags(meshes.size());
+    std::vector<OptixBuildInput> triangleInput(model->meshes.size());
+    std::vector<CUdeviceptr> d_vertices(model->meshes.size());
+    std::vector<CUdeviceptr> d_indices(model->meshes.size());
+    std::vector<uint32_t> triangleInputFlags(model->meshes.size());
 
-    for (int meshID = 0; meshID < meshes.size(); meshID++) 
+    for (int meshID = 0; meshID < model->meshes.size(); meshID++)
     {
       // upload the model to the device: the builder
-      TriangleMesh& model = meshes[meshID];
-      vertexBuffer[meshID].alloc_and_upload(model.vertex);
-      indexBuffer[meshID].alloc_and_upload(model.index);
+      TriangleMesh& mesh = *model->meshes[meshID];
+      vertexBuffer[meshID].alloc_and_upload(mesh.vertex);
+      indexBuffer[meshID].alloc_and_upload(mesh.index);
       
       triangleInput[meshID] = {};
       triangleInput[meshID].type
@@ -188,24 +151,43 @@ namespace Alalba {
       d_indices[meshID] = indexBuffer[meshID].d_pointer();
       triangleInput[meshID].triangleArray.vertexFormat = OPTIX_VERTEX_FORMAT_FLOAT3;
       triangleInput[meshID].triangleArray.vertexStrideInBytes = sizeof(vec3f);
-      triangleInput[meshID].triangleArray.numVertices = (int)model.vertex.size();
+      triangleInput[meshID].triangleArray.numVertices = (int)mesh.vertex.size();
       // the following code will need pointer to the vertex array pointer, so we counld't use local variables as line 184
       triangleInput[meshID].triangleArray.vertexBuffers = &d_vertices[meshID];
 
       triangleInput[meshID].triangleArray.indexFormat = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
       triangleInput[meshID].triangleArray.indexStrideInBytes = sizeof(vec3i);
-      triangleInput[meshID].triangleArray.numIndexTriplets = (int)model.index.size();
+      triangleInput[meshID].triangleArray.numIndexTriplets = (int)mesh.index.size();
       triangleInput[meshID].triangleArray.indexBuffer = d_indices[meshID];
 
       triangleInputFlags[meshID] = 0 ;
 
       // in this example we have one SBT entry, and no per-primitive
       // materials:
-      triangleInput[meshID].triangleArray.flags = &triangleInputFlags[meshID];
-      triangleInput[meshID].triangleArray.numSbtRecords = 1;
-      triangleInput[meshID].triangleArray.sbtIndexOffsetBuffer = 0;
-      triangleInput[meshID].triangleArray.sbtIndexOffsetSizeInBytes = 0;
-      triangleInput[meshID].triangleArray.sbtIndexOffsetStrideInBytes = 0;
+
+      uint32_t temp[] = {
+      0,1
+      };
+
+      CUdeviceptr  d_sbt_indices = 0;
+      const size_t mat_indices_size_in_bytes = (int)mesh.index.size() * sizeof(uint32_t);
+      // sbt index offset for each triangle
+      std::vector<uint32_t> indexoff;
+      indexoff.resize((int)mesh.index.size(), meshID%2);
+
+      cudaMalloc(reinterpret_cast<void**>(&d_sbt_indices), mat_indices_size_in_bytes);
+      cudaMemcpy(
+        reinterpret_cast<void*>(d_sbt_indices),
+        indexoff.data(),
+        mat_indices_size_in_bytes,
+        cudaMemcpyHostToDevice);
+      //triangleInput[meshID].triangleArray.flags = &triangleInputFlags[meshID];
+      triangleInput[meshID].triangleArray.flags = temp;
+      triangleInput[meshID].triangleArray.numSbtRecords = 2;
+      triangleInput[meshID].triangleArray.sbtIndexOffsetBuffer = d_sbt_indices;
+      triangleInput[meshID].triangleArray.sbtIndexOffsetSizeInBytes = sizeof(uint32_t);
+      triangleInput[meshID].triangleArray.sbtIndexOffsetStrideInBytes = sizeof(uint32_t);
+      
     }
     // ==================================================================
     // BLAS setup
@@ -223,7 +205,7 @@ namespace Alalba {
     (optixContext,
       &accelOptions,
       triangleInput.data(),
-      (int)meshes.size(),  // num_build_inputs
+      (int)model->meshes.size(),  // num_build_inputs
       &blasBufferSizes
     ));
 
@@ -252,7 +234,7 @@ namespace Alalba {
       /* stream */0,
       &accelOptions,
       triangleInput.data(),
-      (int)meshes.size(),
+      (int)model->meshes.size(),
       tempBuffer.d_pointer(),
       tempBuffer.sizeInBytes,
 
@@ -536,7 +518,7 @@ namespace Alalba {
     // ------------------------------------------------------------------
     // build hitgroup records
     // ------------------------------------------------------------------
-    int numObjects = (int)meshes.size();
+    int numObjects = (int)model->meshes.size();
     std::vector<HitgroupRecord> hitgroupRecords;
     for (int meshID = 0; meshID < numObjects; meshID++) {
       int objectType = 0;
@@ -544,8 +526,14 @@ namespace Alalba {
       OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[objectType], &rec));
       rec.data.vertex = (vec3f*)vertexBuffer[meshID].d_pointer();
       rec.data.index = (vec3i*)indexBuffer[meshID].d_pointer();
-      rec.data.color = meshes[meshID].color;
+      rec.data.color = model->meshes[meshID]->diffuse;
       hitgroupRecords.push_back(rec);
+      HitgroupRecord rec1;
+      OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[objectType], &rec1));
+      rec1.data.vertex = (vec3f*)vertexBuffer[meshID].d_pointer();
+      rec1.data.index = (vec3i*)indexBuffer[meshID].d_pointer();
+      rec1.data.color = vec3f(1,0,0);
+      hitgroupRecords.push_back(rec1);
     }
     hitgroupRecordsBuffer.alloc_and_upload(hitgroupRecords);
     sbt.hitgroupRecordBase = hitgroupRecordsBuffer.d_pointer();
@@ -584,6 +572,7 @@ namespace Alalba {
   }
 
   /*! set camera to render with */
+  // also set Alalba::camera from glm to gdt
   void SampleRenderer::setCamera(const Camera& camera)
   {
     lastSetCamera = camera;

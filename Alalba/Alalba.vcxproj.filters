@@ -202,6 +202,9 @@
     <Filter Include="vendor\glm\glm\gtx">
       <UniqueIdentifier>{B3A6A76B-9F8A-68C1-08EB-6214F4ED5243}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vendor\tiny_obj_loader">
+      <UniqueIdentifier>{D6D36F96-C2CD-98E8-AB3A-2FF997D3FE54}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Alalba.h">
@@ -256,6 +259,9 @@
       <Filter>src\Alalba\Optix</Filter>
     </ClInclude>
     <ClInclude Include="src\Alalba\Optix\LaunchParams.h">
+      <Filter>src\Alalba\Optix</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Alalba\Optix\Model.h">
       <Filter>src\Alalba\Optix</Filter>
     </ClInclude>
     <ClInclude Include="src\Alalba\Optix\SampleRenderer.h">
@@ -2481,6 +2487,9 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
+    <ClInclude Include="vendor\tiny_obj_loader\tiny_obj_loader.h">
+      <Filter>vendor\tiny_obj_loader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Alalba\Core\Application.cpp">
@@ -2500,6 +2509,9 @@
     </ClCompile>
     <ClCompile Include="src\Alalba\ImGui\ImGuiLayer.cpp">
       <Filter>src\Alalba\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Alalba\Optix\Model.cpp">
+      <Filter>src\Alalba\Optix</Filter>
     </ClCompile>
     <ClCompile Include="src\Alalba\Optix\SampleRenderer.cpp">
       <Filter>src\Alalba\Optix</Filter>

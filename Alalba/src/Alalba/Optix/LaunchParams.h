@@ -17,29 +17,36 @@
 #pragma once
 #include "math/vec.h"
 namespace Alalba {
-  using namespace gdt;
+  //using namespace gdt;
 
   struct TriangleMeshSBTData {
-    vec3f  color;
-    vec3f* vertex;
-    vec3i* index;
+    gdt::vec3f  color;
+    gdt::vec3f* vertex;
+    gdt::vec3i* index;
   };
 
   struct LaunchParams
   {
     struct {
       uint32_t* colorBuffer;
-      vec2i size;
+      gdt::vec2i size;
     } frame;
 
     struct {
-      vec3f position;
-      vec3f direction;
-      vec3f horizontal;
-      vec3f vertical;
+      gdt::vec3f position;
+      gdt::vec3f direction;
+      gdt::vec3f horizontal;
+      gdt::vec3f vertical;
     } camera;
 
     OptixTraversableHandle traversable;
   };
+
+  //struct CameraData {
+  //  gdt::vec3f position;
+  //  gdt::vec3f direction;
+  //  gdt::vec3f horizontal;
+  //  gdt::vec3f vertical;
+  //};
 
 } // ::osc
