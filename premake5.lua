@@ -23,13 +23,16 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 	IncludeDir["ImGui"] = "%{wks.location}/Alalba/vendor/imgui"
 	IncludeDir["glm"] = "%{wks.location}/Alalba/vendor/glm"
 	IncludeDir["gdt"] = "%{wks.location}/Alalba/vendor/gdt/source"
+	IncludeDir["sutil"] = "%{wks.location}/Alalba/vendor/sutil"
 	IncludeDir["eigen"] = "%{wks.location}/Alalba/vendor/eigen"
 	IncludeDir["tiny_obj_loader"] = "%{wks.location}/Alalba/vendor/tiny_obj_loader"
 group"Dependencies"
+	-- call premake5 file in these subfolder
 	include "Alalba/vendor/GLFW"
 	include "Alalba/vendor/Glad"
 	include "Alalba/vendor/imgui"
 	include "Alalba/vendor/gdt"
+	include "Alalba/vendor/sutil"
 group""
 
 project "Alalba"
@@ -75,6 +78,7 @@ project "Alalba"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.eigen}",
 		"%{IncludeDir.gdt}",
+		"%{IncludeDir.sutil}",
 		"%{IncludeDir.tiny_obj_loader}",
 		"%{prj.location}/vendor/stb/include",
 		"%{prj.location}/vendor/assimp/include",
@@ -88,6 +92,7 @@ project "Alalba"
 		"Glad",
 		"ImGui",
 		"gdt",
+		"sutil",
 		"opengl32.lib",
 		--"cuda",
 		--"nvrtc",

@@ -21,6 +21,47 @@ namespace std {
 
 /*! \namespace osc - Optix Siggraph Course */
 namespace Alalba {
+  void Model::addCube(const vec3f& center, const vec3f& size)
+  {
+    PING;
+    affine3f xfm;
+    xfm.p = center - 0.5f * size;
+    xfm.l.vx = vec3f(size.x, 0.f, 0.f);
+    xfm.l.vy = vec3f(0.f, size.y, 0.f);
+    xfm.l.vz = vec3f(0.f, 0.f, size.z);
+    addUnitCube(xfm);
+  }
+
+  /*! add a unit cube (subject to given xfm matrix) to the current
+      triangleMesh */
+  void Model::addUnitCube(const affine3f& xfm)
+  {
+    TriangleMesh* trianglemesh = new TriangleMesh;
+    //int firstVertexID = (int)vertex.size();
+    trianglemesh->vertex.push_back(xfmPoint(xfm, vec3f(0.f, 0.f, 0.f)));
+    trianglemesh->vertex.push_back(xfmPoint(xfm, vec3f(1.f, 0.f, 0.f)));
+    trianglemesh->vertex.push_back(xfmPoint(xfm, vec3f(0.f, 1.f, 0.f)));
+    trianglemesh->vertex.push_back(xfmPoint(xfm, vec3f(1.f, 1.f, 0.f)));
+    trianglemesh->vertex.push_back(xfmPoint(xfm, vec3f(0.f, 0.f, 1.f)));
+    trianglemesh->vertex.push_back(xfmPoint(xfm, vec3f(1.f, 0.f, 1.f)));
+    trianglemesh->vertex.push_back(xfmPoint(xfm, vec3f(0.f, 1.f, 1.f)));
+    trianglemesh->vertex.push_back(xfmPoint(xfm, vec3f(1.f, 1.f, 1.f)));
+
+
+    int indices[] = { 0,1,3, 2,3,0,
+                     5,7,6, 5,6,4,
+                     0,4,5, 0,5,1,
+                     2,3,7, 2,7,6,
+                     1,5,7, 1,7,3,
+                     4,0,2, 4,2,6
+    };
+    for (int i = 0; i < 12; i++)
+      trianglemesh->index.push_back( vec3i(indices[3 * i + 0],
+        indices[3 * i + 1],
+        indices[3 * i + 2]));
+
+    this->meshes.push_back(trianglemesh);
+  }
 
   /*! find vertex with given position, normal, texcoord, and return
       its vertex ID, or, if it doesn't exit, add it to the mesh, and

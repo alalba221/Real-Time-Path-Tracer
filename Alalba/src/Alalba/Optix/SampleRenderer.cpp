@@ -46,6 +46,16 @@ namespace Alalba {
 
   extern "C" char embedded_ptx_code[];
 
+  //template <typename T>
+  //struct Record
+  //{
+  //  __align__(OPTIX_SBT_RECORD_ALIGNMENT)
+
+  //    char header[OPTIX_SBT_RECORD_HEADER_SIZE];
+  //  T data;
+  //};
+  //typedef Record<HitGroupData>    HitgroupRecord;
+
   /*! SBT record for a raygen program */
   struct __align__(OPTIX_SBT_RECORD_ALIGNMENT) RaygenRecord
   {
@@ -65,7 +75,7 @@ namespace Alalba {
   };
 
   /*! SBT record for a hitgroup program */
-  struct __align__(OPTIX_SBT_RECORD_ALIGNMENT) HitgroupRecord
+  struct HitgroupRecord
   {
     __align__(OPTIX_SBT_RECORD_ALIGNMENT) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
     // just a dummy value - later examples will use more interesting
@@ -183,7 +193,7 @@ namespace Alalba {
         cudaMemcpyHostToDevice);
       //triangleInput[meshID].triangleArray.flags = &triangleInputFlags[meshID];
       triangleInput[meshID].triangleArray.flags = temp;
-      triangleInput[meshID].triangleArray.numSbtRecords = 2;
+      triangleInput[meshID].triangleArray.numSbtRecords = 1;
       triangleInput[meshID].triangleArray.sbtIndexOffsetBuffer = d_sbt_indices;
       triangleInput[meshID].triangleArray.sbtIndexOffsetSizeInBytes = sizeof(uint32_t);
       triangleInput[meshID].triangleArray.sbtIndexOffsetStrideInBytes = sizeof(uint32_t);
@@ -519,6 +529,7 @@ namespace Alalba {
     // build hitgroup records
     // ------------------------------------------------------------------
     int numObjects = (int)model->meshes.size();
+ 
     std::vector<HitgroupRecord> hitgroupRecords;
     for (int meshID = 0; meshID < numObjects; meshID++) {
       int objectType = 0;
@@ -527,13 +538,17 @@ namespace Alalba {
       rec.data.vertex = (vec3f*)vertexBuffer[meshID].d_pointer();
       rec.data.index = (vec3i*)indexBuffer[meshID].d_pointer();
       rec.data.color = model->meshes[meshID]->diffuse;
+      //rec.data.geometry.triangle_mesh.vertex = (vec3f*)vertexBuffer[meshID].d_pointer();
+      //rec.data.geometry.triangle_mesh.index = (vec3i*)indexBuffer[meshID].d_pointer();
+      //rec.data.shading.color = model->meshes[meshID]->diffuse;
+      
       hitgroupRecords.push_back(rec);
-      HitgroupRecord rec1;
-      OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[objectType], &rec1));
-      rec1.data.vertex = (vec3f*)vertexBuffer[meshID].d_pointer();
-      rec1.data.index = (vec3i*)indexBuffer[meshID].d_pointer();
-      rec1.data.color = vec3f(1,0,0);
-      hitgroupRecords.push_back(rec1);
+      //HitgroupRecord rec1;
+      //OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[objectType], &rec1));
+      //rec1.data.vertex = (vec3f*)vertexBuffer[meshID].d_pointer();
+      //rec1.data.index = (vec3i*)indexBuffer[meshID].d_pointer();
+      //rec1.data.color = model->meshes[meshID]->diffuse;
+      //hitgroupRecords.push_back(rec1);
     }
     hitgroupRecordsBuffer.alloc_and_upload(hitgroupRecords);
     sbt.hitgroupRecordBase = hitgroupRecordsBuffer.d_pointer();

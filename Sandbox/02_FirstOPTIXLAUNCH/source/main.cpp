@@ -18,7 +18,7 @@ class OptixLayer : public Alalba::Layer
 public:
   OptixLayer(const Model* model)
     :Layer("OptixLayer"),
-    m_Camera(glm::vec3(-1293.07f, 154.681f, -0.7304f), glm::vec3(0.f,200.f,0.f),glm::vec3(0.f,1.f,0.f)),
+    m_Camera(glm::vec3(-10.f, 2.f, -12.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f)),
     sample(model)
   {}
   virtual ~OptixLayer() {}
@@ -127,9 +127,14 @@ public:
 
 	Sandbox02()
 	{
-    Model* model = loadOBJ(
-      "assets/sponza/sponza.obj"
-    );
+    //Model* model = loadOBJ(
+    //  "assets/sponza/sponza.obj"
+    //);
+    Model* model = new Model;
+    model->addCube(vec3f(0.f, -1.5f, 0.f), vec3f(10.f, .1f, 10.f));
+    model->addCube(vec3f(0.f, 0.f, 0.f), vec3f(2.f, 2.f, 2.f));
+    model->meshes[0]->diffuse = vec3f(0.f, 1.f, 0.f);
+    model->meshes[1]->diffuse = vec3f(0.f, 0.f, 1.f);
 		PushLayer(new OptixLayer(model));
 	};
 	~Sandbox02() {};

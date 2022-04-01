@@ -25,15 +25,6 @@
 /*! \namespace osc - Optix Siggraph Course */
 namespace Alalba {
 
-  //struct RT_Camera {
-  //  /*! camera position - *from* where we are looking */
-  //  vec3f from;
-  //  /*! which point we are looking *at* */
-  //  vec3f at;
-  //  /*! general up-vector */
-  //  vec3f up;
-  //};
-
   /*! a sample OptiX-7 renderer that demonstrates how to set up
       context, module, programs, pipeline, SBT, etc, and perform a
       valid launch that renders some pixel (using a simple test

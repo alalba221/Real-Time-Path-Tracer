@@ -52,25 +52,37 @@ namespace Alalba {
 
   extern "C" __global__ void __closesthit__radiance()
   { 
-    //const int   primID = optixGetPrimitiveIndex();
-    //vec3f& prd = *(vec3f*)getPRD<vec3f>();
-    //prd = gdt::randomColor(primID);
     const TriangleMeshSBTData& sbtData
       = *(const TriangleMeshSBTData*)optixGetSbtDataPointer();
 
     // compute normal: local!!!
     const int   primID = optixGetPrimitiveIndex();
-    const vec3i index = sbtData.index[primID];
-    const vec3f& A = sbtData.vertex[index.x];
-    const vec3f& B = sbtData.vertex[index.y];
-    const vec3f& C = sbtData.vertex[index.z];
-    const vec3f Ng = normalize(cross(B - A, C - A));
+    const gdt::vec3i index = sbtData.index[primID];
+    const gdt::vec3f& A = sbtData.vertex[index.x];
+    const gdt::vec3f& B = sbtData.vertex[index.y];
+    const gdt::vec3f& C = sbtData.vertex[index.z];
+    const gdt::vec3f Ng = normalize(cross(B - A, C - A));
 
-    const vec3f rayDir = optixGetWorldRayDirection();
+    const gdt::vec3f rayDir = optixGetWorldRayDirection();
     const float cosDN = 0.2f + .8f * fabsf(dot(rayDir, Ng));
-    vec3f& prd = *(vec3f*)getPRD<vec3f>();
+    gdt::vec3f& prd = *(gdt::vec3f*)getPRD<gdt::vec3f>();
     prd = cosDN *sbtData.color;
-    
+
+    //const HitGroupData& sbtData
+    //  = *(const HitGroupData*)optixGetSbtDataPointer();
+
+    //// compute normal: local!!!
+    //const int   primID = optixGetPrimitiveIndex();
+    //const gdt::vec3i index = sbtData.geometry.triangle_mesh.index[primID];
+    //const gdt::vec3f& A = sbtData.geometry.triangle_mesh.vertex[index.x];
+    //const gdt::vec3f& B = sbtData.geometry.triangle_mesh.vertex[index.y];
+    //const gdt::vec3f& C = sbtData.geometry.triangle_mesh.vertex[index.z];
+    //const gdt::vec3f Ng = normalize(cross(B - A, C - A));
+
+    //const gdt::vec3f rayDir = optixGetWorldRayDirection();
+    //const float cosDN = 0.2f + .8f * fabsf(dot(rayDir, Ng));
+    //gdt::vec3f& prd = *(gdt::vec3f*)getPRD<gdt::vec3f>();
+    //prd = cosDN * sbtData.shading.color;
   }
 
   extern "C" __global__ void __anyhit__radiance()
@@ -89,9 +101,9 @@ namespace Alalba {
 
   extern "C" __global__ void __miss__radiance()
   { 
-    vec3f& prd = *(vec3f*)getPRD<vec3f>();
+    gdt::vec3f& prd = *(gdt::vec3f*)getPRD<gdt::vec3f>();
     // set to constant white as background color
-    prd = vec3f(1.f);
+    prd = gdt::vec3f(1.f);
   }
 
 
@@ -110,18 +122,18 @@ namespace Alalba {
     // our per-ray data for this example. what we initialize it to
     // won't matter, since this value will be overwritten by either
     // the miss or hit program, anyway
-    vec3f pixelColorPRD = vec3f(0.f);
+    gdt::vec3f pixelColorPRD = gdt::vec3f(0.f);
 
     // the values we store the PRD pointer in:
     uint32_t u0, u1;
     packPointer(&pixelColorPRD, u0, u1);
 
     // normalized screen plane position, in [0,1]^2
-    const vec2f screen(vec2f(ix + .5f, iy + .5f)
-      / vec2f(optixLaunchParams.frame.size));
+    const gdt::vec2f screen(gdt::vec2f(ix + .5f, iy + .5f)
+      / gdt::vec2f(optixLaunchParams.frame.size));
 
     // generate ray direction
-    vec3f rayDir = normalize(camera.direction
+    gdt::vec3f rayDir = normalize(camera.direction
       + (screen.x - 0.5f) * camera.horizontal
       + (screen.y - 0.5f) * camera.vertical);
 

@@ -16,13 +16,52 @@
 
 #pragma once
 #include "math/vec.h"
+#include <vector_types.h>
 namespace Alalba {
   //using namespace gdt;
-
   struct TriangleMeshSBTData {
     gdt::vec3f  color;
     gdt::vec3f* vertex;
     gdt::vec3i* index;
+    //float3  color;
+    //float3* vertex;
+    //float3* index;
+  };
+  struct SphereSBTData {
+    //gdt::vec3f  center;
+    float3  center;
+    float radius;
+  };
+  struct SphereShellMeshSBTData {
+    //gdt::vec3f  center;
+    float3  center;
+    float radius1;
+    float radius2;
+  };
+  struct ParalelogramSBTData {
+    float4	plane;
+    float3 	v1;
+    float3 	v2;
+    float3 	anchor;
+  };
+
+  struct HitGroupData
+  {
+    union
+    {
+      SphereSBTData sphere;
+      SphereShellMeshSBTData          sphere_shell;
+      ParalelogramSBTData        parallelogram;
+      TriangleMeshSBTData  triangle_mesh;
+    } geometry;
+
+    union 
+    {
+      //Phong           metal;
+      //Glass           glass;
+      //CheckerPhong    checker;
+      float3     color;
+    } shading;
   };
 
   struct LaunchParams
@@ -41,12 +80,5 @@ namespace Alalba {
 
     OptixTraversableHandle traversable;
   };
-
-  //struct CameraData {
-  //  gdt::vec3f position;
-  //  gdt::vec3f direction;
-  //  gdt::vec3f horizontal;
-  //  gdt::vec3f vertical;
-  //};
 
 } // ::osc
