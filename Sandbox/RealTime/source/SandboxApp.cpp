@@ -28,7 +28,7 @@ public:
 	EditorLayer()
 		: Layer("Example"),
 		m_Scene(Scene::Spheres),
-		m_Camera(glm::perspectiveFov(glm::radians(45.0f), 1280*2.0f, 720*2.0f, 0.1f, 10000.0f))
+		m_Camera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 10000.0f))
 	{
 	}
 	virtual ~EditorLayer()

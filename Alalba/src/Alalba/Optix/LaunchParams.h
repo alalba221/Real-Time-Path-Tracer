@@ -17,58 +17,38 @@
 #pragma once
 #include "math/vec.h"
 #include <vector_types.h>
+#include <curand_kernel.h>
+#include"random/random.h"
 namespace Alalba {
-  //using namespace gdt;
+
   struct TriangleMeshSBTData {
-    gdt::vec3f  color;
     gdt::vec3f* vertex;
     gdt::vec3i* index;
-    //float3  color;
-    //float3* vertex;
-    //float3* index;
-  };
-  struct SphereSBTData {
-    //gdt::vec3f  center;
-    float3  center;
-    float radius;
-  };
-  struct SphereShellMeshSBTData {
-    //gdt::vec3f  center;
-    float3  center;
-    float radius1;
-    float radius2;
-  };
-  struct ParalelogramSBTData {
-    float4	plane;
-    float3 	v1;
-    float3 	v2;
-    float3 	anchor;
+    gdt::vec3f  albedo;
+    gdt::vec3f emission;
   };
 
-  struct HitGroupData
+  enum
   {
-    union
-    {
-      SphereSBTData sphere;
-      SphereShellMeshSBTData          sphere_shell;
-      ParalelogramSBTData        parallelogram;
-      TriangleMeshSBTData  triangle_mesh;
-    } geometry;
-
-    union 
-    {
-      //Phong           metal;
-      //Glass           glass;
-      //CheckerPhong    checker;
-      float3     color;
-    } shading;
+    RAY_TYPE_RADIANCE = 0,
+    RAY_TYPE_OCCLUSION = 1,
+    RAY_TYPE_COUNT
   };
 
+  struct ParallelogramLight {
+    gdt::vec3f emission;
+    gdt::vec3f corner;
+    gdt::vec3f v1;
+    gdt::vec3f v2;
+    gdt::vec3f normal;
+  };
   struct LaunchParams
   {
     struct {
       uint32_t* colorBuffer;
+      uint32_t* accum_buffer;
       gdt::vec2i size;
+      int       accumID{ 0 };
     } frame;
 
     struct {
@@ -77,8 +57,12 @@ namespace Alalba {
       gdt::vec3f horizontal;
       gdt::vec3f vertical;
     } camera;
-
+    
+    ParallelogramLight light;
+    int light_samples;
+    unsigned int subframe_index;
+    unsigned int samples_per_launch;
     OptixTraversableHandle traversable;
   };
 
-} // ::osc
+} 

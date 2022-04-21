@@ -18,16 +18,16 @@ class OptixLayer : public Alalba::Layer
 public:
   OptixLayer(const Model* model)
     :Layer("OptixLayer"),
-    m_Camera(glm::vec3(-10.f, 2.f, -12.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f)),
+    m_Camera(glm::vec3(278, 278, -600), glm::vec3(278, 278, 0), glm::vec3(0.f, 1.f, 0.f)),
     sample(model)
   {}
   virtual ~OptixLayer() {}
   virtual void OnAttach() override
   {
     // optix
-    fbSize = vec2i(1280 * 2.0f, 720 * 2.0f);
+    fbSize = vec2i(1280.0f * 2, 720.0f * 2);
     sample.resize(fbSize);
-    pixels.resize(1280 * 2 * 720 * 2);
+    pixels.resize(1280 * 720 * 2 * 2);
     sample.render();
     sample.downloadPixels(pixels.data());
     // opengl
@@ -74,6 +74,7 @@ public:
   {
     /// Cam test
     m_Camera.Update();
+
     sample.setCamera(m_Camera);
    
 
@@ -86,8 +87,11 @@ public:
    // 
 
     Alalba::Renderer::Clear(0.2f, 0.3f, 0.8f, 1.0f);
-    //m_OptixResult.reset(Alalba::Texture2D::Create("osc_example2.png"));
-    m_OptixResult->ReloadFromMemory((unsigned char*)pixels.data(), 1280 * 2, 720 * 2);
+    //if (m_Camera.m_Changed)
+    //{
+     m_OptixResult->ReloadFromMemory((unsigned char*)pixels.data(), 1280 * 2, 720 * 2);
+    //  m_Camera.m_Changed = false;
+    //}
     m_Shader->Bind();
     m_OptixResult->Bind(0);
     m_VertexBuffer->Bind();
@@ -127,14 +131,20 @@ public:
 
 	Sandbox02()
 	{
-    //Model* model = loadOBJ(
-    //  "assets/sponza/sponza.obj"
-    //);
+
+    Lambertian* white = new Lambertian(gdt::vec3f(.73f, .73f, .73f));
+    Lambertian* red   = new Lambertian(gdt::vec3f(.65f, .05f, .05f));
+    Lambertian* green = new Lambertian(gdt::vec3f(.12f, .45f, .15f));
+    Diffuse_light* light = new Diffuse_light(gdt::vec3f(1.f, 1.f, 1.f));
+   
     Model* model = new Model;
-    model->addCube(vec3f(0.f, -1.5f, 0.f), vec3f(10.f, .1f, 10.f));
-    model->addCube(vec3f(0.f, 0.f, 0.f), vec3f(2.f, 2.f, 2.f));
-    model->meshes[0]->diffuse = vec3f(0.f, 1.f, 0.f);
-    model->meshes[1]->diffuse = vec3f(0.f, 0.f, 1.f);
+    model->MergeModel(loadOBJ("assets/cornellbox/floor.obj",white));
+    model->MergeModel(loadOBJ("assets/cornellbox/left.obj", red));
+    model->MergeModel(loadOBJ("assets/cornellbox/right.obj", green));
+    model->MergeModel(loadOBJ("assets/cornellbox/light.obj", light));
+    model->MergeModel(loadOBJ("assets/cornellbox/shortbox.obj", white));
+    model->MergeModel(loadOBJ("assets/cornellbox/tallbox.obj", white));
+    model->MergeModel(loadOBJ("assets/bunny/untitled.obj", white));
 		PushLayer(new OptixLayer(model));
 	};
 	~Sandbox02() {};

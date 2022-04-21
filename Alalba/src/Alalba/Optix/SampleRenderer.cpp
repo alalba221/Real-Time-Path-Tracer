@@ -17,7 +17,7 @@
 #include "SampleRenderer.h"
 // this include may only appear in a single source file:
 #include <optix_function_table_definition.h>
-
+#include <memory>
 /*! \namespace osc - Optix Siggraph Course */
 namespace Alalba {
 
@@ -84,14 +84,14 @@ namespace Alalba {
     //int objectID;
   };
 
- 
+
   /*! constructor - performs all setup, including initializing
     optix, creates module, pipeline, programs, SBT, etc. */
   SampleRenderer::SampleRenderer(const Model* model)
     :lastSetCamera(Camera(  /*from*/glm::vec3(-10.f, 2.f, -12.f),
       /* at */glm::vec3(0.f, 0.f, 0.f),
       /* up */glm::vec3(0.f, 1.f, 0.f)))
-    ,model(model)
+    , model(model)
   {
     initOptix();
 
@@ -116,7 +116,14 @@ namespace Alalba {
     std::cout << "#osc: building SBT ..." << std::endl;
     buildSBT();
 
+    setLight();
+
     launchParamsBuffer.alloc(sizeof(launchParams));
+    // init LaunchParames
+    launchParams.subframe_index = 0;
+    launchParams.samples_per_launch = 16;
+
+
     std::cout << "#osc: context, module, pipeline, etc, all set up ..." << std::endl;
 
     std::cout << GDT_TERMINAL_GREEN;
@@ -130,7 +137,7 @@ namespace Alalba {
     PRINT(model->meshes.size());
     vertexBuffer.resize(model->meshes.size());
     indexBuffer.resize(model->meshes.size());
-    
+
     OptixTraversableHandle asHandle{ 0 };
 
     // ==================================================================
@@ -147,7 +154,7 @@ namespace Alalba {
       TriangleMesh& mesh = *model->meshes[meshID];
       vertexBuffer[meshID].alloc_and_upload(mesh.vertex);
       indexBuffer[meshID].alloc_and_upload(mesh.index);
-      
+
       triangleInput[meshID] = {};
       triangleInput[meshID].type
         = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
@@ -156,7 +163,7 @@ namespace Alalba {
       // device pointers
       //CUdeviceptr d_vertices = vertexBuffer[meshID].d_pointer();
       //CUdeviceptr d_indices = indexBuffer[meshID].d_pointer();
-      
+
       d_vertices[meshID] = vertexBuffer[meshID].d_pointer();
       d_indices[meshID] = indexBuffer[meshID].d_pointer();
       triangleInput[meshID].triangleArray.vertexFormat = OPTIX_VERTEX_FORMAT_FLOAT3;
@@ -170,35 +177,38 @@ namespace Alalba {
       triangleInput[meshID].triangleArray.numIndexTriplets = (int)mesh.index.size();
       triangleInput[meshID].triangleArray.indexBuffer = d_indices[meshID];
 
-      triangleInputFlags[meshID] = 0 ;
+      triangleInputFlags[meshID] = 0;
 
-      // in this example we have one SBT entry, and no per-primitive
-      // materials:
+      
 
-      uint32_t temp[] = {
-      0,1
-      };
+      //CUdeviceptr  d_sbt_indices = 0;
+      //const size_t mat_indices_size_in_bytes = (int)mesh.index.size() * sizeof(uint32_t);
+      //// sbt index offset for each triangle
+      //std::vector<uint32_t> indexoff;
+      //indexoff.resize((int)mesh.index.size(), 1);
 
-      CUdeviceptr  d_sbt_indices = 0;
-      const size_t mat_indices_size_in_bytes = (int)mesh.index.size() * sizeof(uint32_t);
-      // sbt index offset for each triangle
-      std::vector<uint32_t> indexoff;
-      indexoff.resize((int)mesh.index.size(), meshID%2);
-
-      cudaMalloc(reinterpret_cast<void**>(&d_sbt_indices), mat_indices_size_in_bytes);
-      cudaMemcpy(
-        reinterpret_cast<void*>(d_sbt_indices),
-        indexoff.data(),
-        mat_indices_size_in_bytes,
-        cudaMemcpyHostToDevice);
-      //triangleInput[meshID].triangleArray.flags = &triangleInputFlags[meshID];
-      triangleInput[meshID].triangleArray.flags = temp;
+      //cudaMalloc(reinterpret_cast<void**>(&d_sbt_indices), mat_indices_size_in_bytes);
+      //cudaMemcpy(
+      //  reinterpret_cast<void*>(d_sbt_indices),
+      //  indexoff.data(),
+      //  mat_indices_size_in_bytes,
+      //  cudaMemcpyHostToDevice);
+      
+      // --------------------------------------------------------
+      // guide
+      // https://raytracing-docs.nvidia.com/optix7/guide/index.html#shader_binding_table#shader-binding-table
+      // -------------------------------------------------------
+      // in this example we have one SBT entry, and no per-primitive materials:
+      triangleInput[meshID].triangleArray.flags = &triangleInputFlags[meshID];;
       triangleInput[meshID].triangleArray.numSbtRecords = 1;
-      triangleInput[meshID].triangleArray.sbtIndexOffsetBuffer = d_sbt_indices;
+      // triangleInput[meshID].triangleArray.sbtIndexOffsetBuffer = d_sbt_indices;
+      triangleInput[meshID].triangleArray.sbtIndexOffsetBuffer = 0;
       triangleInput[meshID].triangleArray.sbtIndexOffsetSizeInBytes = sizeof(uint32_t);
       triangleInput[meshID].triangleArray.sbtIndexOffsetStrideInBytes = sizeof(uint32_t);
-      
+
     }
+
+
     // ==================================================================
     // BLAS setup
     // ==================================================================
@@ -358,7 +368,7 @@ namespace Alalba {
 
     //const std::string ptxCode = embedded_ptx_code;
     const std::string ptxCode = readPTX("assets/deviceCode.ptx");
-    
+
 
     char log[2048];
     size_t sizeof_log = sizeof(log);
@@ -404,51 +414,94 @@ namespace Alalba {
   void SampleRenderer::createMissPrograms()
   {
     // we do a single ray gen program in this example:
-    missPGs.resize(1);
+    missPGs.resize(2);
+    {
+      OptixProgramGroupOptions pgOptions = {};
+      OptixProgramGroupDesc pgDesc = {};
+      pgDesc.kind = OPTIX_PROGRAM_GROUP_KIND_MISS;
+      pgDesc.miss.module = module;
+      pgDesc.miss.entryFunctionName = "__miss__radiance";
 
-    OptixProgramGroupOptions pgOptions = {};
-    OptixProgramGroupDesc pgDesc = {};
-    pgDesc.kind = OPTIX_PROGRAM_GROUP_KIND_MISS;
-    pgDesc.miss.module = module;
-    pgDesc.miss.entryFunctionName = "__miss__radiance";
+      // OptixProgramGroup raypg;
+      char log[2048];
+      size_t sizeof_log = sizeof(log);
+      OPTIX_CHECK(optixProgramGroupCreate(optixContext,
+        &pgDesc,
+        1,
+        &pgOptions,
+        log, &sizeof_log,
+        &missPGs[0]
+      ));
+      if (sizeof_log > 1) PRINT(log);
+    }
 
-    // OptixProgramGroup raypg;
-    char log[2048];
-    size_t sizeof_log = sizeof(log);
-    OPTIX_CHECK(optixProgramGroupCreate(optixContext,
-      &pgDesc,
-      1,
-      &pgOptions,
-      log, &sizeof_log,
-      &missPGs[0]
-    ));
-    if (sizeof_log > 1) PRINT(log);
+    {
+      OptixProgramGroupOptions pgOptions = {};
+      OptixProgramGroupDesc pgDesc = {};
+      pgDesc.kind = OPTIX_PROGRAM_GROUP_KIND_MISS;
+      pgDesc.miss.module = module;
+      pgDesc.miss.entryFunctionName = "__miss__occlusion";
+
+     
+      char log[2048];
+      size_t sizeof_log = sizeof(log);
+      OPTIX_CHECK(optixProgramGroupCreate(optixContext,
+        &pgDesc,
+        1,
+        &pgOptions,
+        log, &sizeof_log,
+        &missPGs[1]
+      ));
+      if (sizeof_log > 1) PRINT(log);
+    }
   }
 
   /*! does all setup for the hitgroup program(s) we are going to use */
   void SampleRenderer::createHitgroupPrograms()
   {
     // for this simple example, we set up a single hit group
-    hitgroupPGs.resize(1);
+    hitgroupPGs.resize(2);
+    {
+      OptixProgramGroupOptions pgOptions = {};
+      OptixProgramGroupDesc pgDesc = {};
+      pgDesc.kind = OPTIX_PROGRAM_GROUP_KIND_HITGROUP;
+      pgDesc.hitgroup.moduleCH = module;
+      pgDesc.hitgroup.entryFunctionNameCH = "__closesthit__radiance";
+      pgDesc.hitgroup.moduleAH = module;
+      pgDesc.hitgroup.entryFunctionNameAH = "__anyhit__radiance";
 
-    OptixProgramGroupOptions pgOptions = {};
-    OptixProgramGroupDesc pgDesc = {};
-    pgDesc.kind = OPTIX_PROGRAM_GROUP_KIND_HITGROUP;
-    pgDesc.hitgroup.moduleCH = module;
-    pgDesc.hitgroup.entryFunctionNameCH = "__closesthit__radiance";
-    pgDesc.hitgroup.moduleAH = module;
-    pgDesc.hitgroup.entryFunctionNameAH = "__anyhit__radiance";
+      char log[2048];
+      size_t sizeof_log = sizeof(log);
+      OPTIX_CHECK(optixProgramGroupCreate(optixContext,
+        &pgDesc,
+        1,
+        &pgOptions,
+        log, &sizeof_log,
+        &hitgroupPGs[0]
+      ));
+      if (sizeof_log > 1) PRINT(log);
+    }
 
-    char log[2048];
-    size_t sizeof_log = sizeof(log);
-    OPTIX_CHECK(optixProgramGroupCreate(optixContext,
-      &pgDesc,
-      1,
-      &pgOptions,
-      log, &sizeof_log,
-      &hitgroupPGs[0]
-    ));
-    if (sizeof_log > 1) PRINT(log);
+    {
+      OptixProgramGroupOptions pgOptions = {};
+      OptixProgramGroupDesc pgDesc = {};
+      pgDesc.kind = OPTIX_PROGRAM_GROUP_KIND_HITGROUP;
+      pgDesc.hitgroup.moduleCH = module;
+      pgDesc.hitgroup.entryFunctionNameCH = "__closesthit__occlusion";
+      pgDesc.hitgroup.moduleAH = module;
+      pgDesc.hitgroup.entryFunctionNameAH = "__anyhit__occlusion";
+
+      char log[2048];
+      size_t sizeof_log = sizeof(log);
+      OPTIX_CHECK(optixProgramGroupCreate(optixContext,
+        &pgDesc,
+        1,
+        &pgOptions,
+        log, &sizeof_log,
+        &hitgroupPGs[1]
+      ));
+      if (sizeof_log > 1) PRINT(log);
+    }
   }
 
 
@@ -529,26 +582,31 @@ namespace Alalba {
     // build hitgroup records
     // ------------------------------------------------------------------
     int numObjects = (int)model->meshes.size();
- 
+
     std::vector<HitgroupRecord> hitgroupRecords;
-    for (int meshID = 0; meshID < numObjects; meshID++) {
-      int objectType = 0;
-      HitgroupRecord rec;
-      OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[objectType], &rec));
-      rec.data.vertex = (vec3f*)vertexBuffer[meshID].d_pointer();
-      rec.data.index = (vec3i*)indexBuffer[meshID].d_pointer();
-      rec.data.color = model->meshes[meshID]->diffuse;
-      //rec.data.geometry.triangle_mesh.vertex = (vec3f*)vertexBuffer[meshID].d_pointer();
-      //rec.data.geometry.triangle_mesh.index = (vec3i*)indexBuffer[meshID].d_pointer();
-      //rec.data.shading.color = model->meshes[meshID]->diffuse;
+    for (int meshID = 0; meshID < numObjects; meshID++) 
+    {
+      for (int rayID = 0; rayID < RAY_TYPE_COUNT; rayID++)
+      {
+        HitgroupRecord rec;
+        OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[rayID], &rec));
+        rec.data.vertex = (vec3f*)vertexBuffer[meshID].d_pointer();
+        rec.data.index = (vec3i*)indexBuffer[meshID].d_pointer();
       
-      hitgroupRecords.push_back(rec);
-      //HitgroupRecord rec1;
-      //OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[objectType], &rec1));
-      //rec1.data.vertex = (vec3f*)vertexBuffer[meshID].d_pointer();
-      //rec1.data.index = (vec3i*)indexBuffer[meshID].d_pointer();
-      //rec1.data.color = model->meshes[meshID]->diffuse;
-      //hitgroupRecords.push_back(rec1);
+        switch (model->meshes[meshID]->material->type)
+        {
+          case m_type::LAMBERTIAN:
+            rec.data.albedo = ((Lambertian*)(model->meshes[meshID]->material))->albedo;
+            rec.data.emission = gdt::vec3f(0.f);
+            //rec.data.kd = gdt::vec3f(1.f);
+            break;
+          case m_type::LIGHT:
+            rec.data.emission = ((Diffuse_light*)(model->meshes[meshID]->material))->emit;
+            //rec.data.kd = gdt::vec3f(1.f);
+            break;
+        }
+        hitgroupRecords.push_back(rec);
+      }
     }
     hitgroupRecordsBuffer.alloc_and_upload(hitgroupRecords);
     sbt.hitgroupRecordBase = hitgroupRecordsBuffer.d_pointer();
@@ -564,9 +622,9 @@ namespace Alalba {
     // sanity check: make sure we launch only after first resize is
     // already done:
     if (launchParams.frame.size.x == 0) return;
-
+    launchParams.frame.accumID++;
     launchParamsBuffer.upload(&launchParams, 1);
-  
+
 
     OPTIX_CHECK(optixLaunch(/*! pipeline we're launching launch: */
       pipeline, stream,
@@ -583,26 +641,43 @@ namespace Alalba {
     // display (obviously, for a high-performance application you
     // want to use streams and double-buffering, but for this simple
     // example, this will have to do)
+    //launchParams.subframe_index++;
     CUDA_SYNC_CHECK();
   }
 
+
+  ///
+  void SampleRenderer::setLight()
+  {
+    launchParams.light.corner = gdt::vec3f(213.f, 548.7f, 227.f);
+    launchParams.light.emission = gdt::vec3f(15.f, 15.f, 15.f);
+    launchParams.light.v1 = gdt::vec3f(130.f, 0.f, 0.f);
+    launchParams.light.v2 = gdt::vec3f(0.f, 0.f, 105.f);
+    launchParams.light.normal = gdt::normalize(gdt::cross(launchParams.light.v1, launchParams.light.v2));
+  }
   /*! set camera to render with */
   // also set Alalba::camera from glm to gdt
-  void SampleRenderer::setCamera(const Camera& camera)
+  void SampleRenderer::setCamera(Camera& camera)
   {
+    if (!camera.m_Changed)
+      return;
+
+    launchParams.subframe_index = 0;
+    //camera.m_Changed = false;
+
     lastSetCamera = camera;
     launchParams.camera.position = vec3f(camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
-    
+
     glm::vec3 dirction = lastSetCamera.GetForwardDirection();
-    
+
     launchParams.camera.direction = vec3f(dirction.x, dirction.y, dirction.z);
     const float cosFovy = 0.66f;
     const float aspect = launchParams.frame.size.x / float(launchParams.frame.size.y);
-    
+
     glm::vec3 horizontal = lastSetCamera.GetRightDirection();
     launchParams.camera.horizontal
       = cosFovy * aspect * vec3f(horizontal.x, horizontal.y, horizontal.z);
-    
+
     glm::vec3 vertical = lastSetCamera.GetUpDirection();
     launchParams.camera.vertical
       = cosFovy * vec3f(vertical.x, vertical.y, vertical.z);

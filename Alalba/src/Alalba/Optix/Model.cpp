@@ -21,48 +21,6 @@ namespace std {
 
 /*! \namespace osc - Optix Siggraph Course */
 namespace Alalba {
-  void Model::addCube(const vec3f& center, const vec3f& size)
-  {
-    PING;
-    affine3f xfm;
-    xfm.p = center - 0.5f * size;
-    xfm.l.vx = vec3f(size.x, 0.f, 0.f);
-    xfm.l.vy = vec3f(0.f, size.y, 0.f);
-    xfm.l.vz = vec3f(0.f, 0.f, size.z);
-    addUnitCube(xfm);
-  }
-
-  /*! add a unit cube (subject to given xfm matrix) to the current
-      triangleMesh */
-  void Model::addUnitCube(const affine3f& xfm)
-  {
-    TriangleMesh* trianglemesh = new TriangleMesh;
-    //int firstVertexID = (int)vertex.size();
-    trianglemesh->vertex.push_back(xfmPoint(xfm, vec3f(0.f, 0.f, 0.f)));
-    trianglemesh->vertex.push_back(xfmPoint(xfm, vec3f(1.f, 0.f, 0.f)));
-    trianglemesh->vertex.push_back(xfmPoint(xfm, vec3f(0.f, 1.f, 0.f)));
-    trianglemesh->vertex.push_back(xfmPoint(xfm, vec3f(1.f, 1.f, 0.f)));
-    trianglemesh->vertex.push_back(xfmPoint(xfm, vec3f(0.f, 0.f, 1.f)));
-    trianglemesh->vertex.push_back(xfmPoint(xfm, vec3f(1.f, 0.f, 1.f)));
-    trianglemesh->vertex.push_back(xfmPoint(xfm, vec3f(0.f, 1.f, 1.f)));
-    trianglemesh->vertex.push_back(xfmPoint(xfm, vec3f(1.f, 1.f, 1.f)));
-
-
-    int indices[] = { 0,1,3, 2,3,0,
-                     5,7,6, 5,6,4,
-                     0,4,5, 0,5,1,
-                     2,3,7, 2,7,6,
-                     1,5,7, 1,7,3,
-                     4,0,2, 4,2,6
-    };
-    for (int i = 0; i < 12; i++)
-      trianglemesh->index.push_back( vec3i(indices[3 * i + 0],
-        indices[3 * i + 1],
-        indices[3 * i + 2]));
-
-    this->meshes.push_back(trianglemesh);
-  }
-
   /*! find vertex with given position, normal, texcoord, and return
       its vertex ID, or, if it doesn't exit, add it to the mesh, and
       its just-created index */
@@ -101,7 +59,7 @@ namespace Alalba {
     return newID;
   }
 
-  Model* loadOBJ(const std::string& objFile)
+  Model* loadOBJ(const std::string& objFile, Material* material)
   {
     Model* model = new Model;
 
@@ -123,22 +81,22 @@ namespace Alalba {
         objFile.c_str(),
         mtlDir.c_str(),
         /* triangulate */true);
-    if (!readOK) 
+    if (!readOK)
     {
       throw std::runtime_error("Could not read OBJ model from " + objFile + ":" + mtlDir + " : " + err);
     }
 
-    if (materials.empty())
-      throw std::runtime_error("could not parse materials ...");
+    //if (materials.empty())
+    //  throw std::runtime_error("could not parse materials ...");
 
     std::cout << "Done loading obj file - found " << shapes.size() << " shapes with " << materials.size() << " materials" << std::endl;
-    
-  /// loop over shapes
-    for (int shapeID = 0; shapeID < (int)shapes.size(); shapeID++) 
+
+    /// loop over shapes
+    for (int shapeID = 0; shapeID < (int)shapes.size(); shapeID++)
     {
-    /// loop over face
+      /// loop over face
       tinyobj::shape_t& shape = shapes[shapeID];
-      
+
       //build a set of material id for eace face 
       std::set<int> materialIDs;
       for (auto faceMatID : shape.mesh.material_ids)
@@ -146,11 +104,11 @@ namespace Alalba {
 
       std::map<tinyobj::index_t, int> knownVertices;
 
-      for (int materialID : materialIDs) 
+      for (int materialID : materialIDs)
       {
         TriangleMesh* mesh = new TriangleMesh;
 
-        for (int faceID = 0; faceID < shape.mesh.material_ids.size(); faceID++) 
+        for (int faceID = 0; faceID < shape.mesh.material_ids.size(); faceID++)
         {
           if (shape.mesh.material_ids[faceID] != materialID) continue;
           tinyobj::index_t idx0 = shape.mesh.indices[3 * faceID + 0];
@@ -161,8 +119,10 @@ namespace Alalba {
             addVertex(mesh, attributes, idx1, knownVertices),
             addVertex(mesh, attributes, idx2, knownVertices));
           mesh->index.push_back(idx);
-          mesh->diffuse = (const vec3f&)materials[materialID].diffuse;
-          mesh->diffuse = gdt::randomColor(materialID);
+          //mesh->diffuse = (const vec3f&)materials[materialID].diffuse;
+          //mesh->diffuse = gdt::randomColor(faceID);
+          mesh->material = material;
+
         }
 
         if (mesh->vertex.empty())
@@ -180,5 +140,11 @@ namespace Alalba {
 
     std::cout << "created a total of " << model->meshes.size() << " meshes" << std::endl;
     return model;
+  }
+  void Model::MergeModel(Model* model)
+  {
+    for (auto mesh : model->meshes) {
+      meshes.push_back(mesh);
+    }
   }
 }

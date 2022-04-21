@@ -48,8 +48,9 @@ namespace Alalba {
     void downloadPixels(uint32_t h_pixels[]);
 
     /*! set camera to render with */
-    void setCamera(const Camera& camera);
+    void setCamera(Camera& camera);
 
+    void setLight();
    protected:
     // ------------------------------------------------------------------
     // internal helper functions

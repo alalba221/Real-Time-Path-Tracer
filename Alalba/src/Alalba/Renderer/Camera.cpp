@@ -47,8 +47,8 @@ namespace Alalba {
 		m_Up = up;
 		m_Distance = glm::distance(m_Position, m_FocalPoint);
 
-		m_Yaw = 0;
-		m_Pitch = 0;
+		m_Yaw = M_PI;
+		m_Pitch = 0 ;
 	}
 
 	void Camera::Focus()
@@ -59,6 +59,7 @@ namespace Alalba {
 	{
 		if (Input::IsKeyPressed(GLFW_KEY_LEFT_ALT))
 		{
+			m_Changed = true;
 			const glm::vec2& mouse{ Input::GetMouseX(), Input::GetMouseY() };
 			glm::vec2 delta = mouse - m_InitialMousePosition;
 			m_InitialMousePosition = mouse;
@@ -72,15 +73,15 @@ namespace Alalba {
 		}
 
 		m_Position = CalculatePosition();
-
-		glm::quat orientation = GetOrientation();
-		m_Rotation = glm::eulerAngles(orientation) * (180.0f / (float)M_PI);
 		
+		glm::quat orientation = GetOrientation();
+
+		m_Rotation = glm::eulerAngles(orientation) * (180.0f / (float)M_PI);
 		m_ViewMatrix = glm::toMat4(glm::conjugate(orientation)) * glm::translate(glm::mat4(1.0f), -m_Position);
 		// T*R*S
 		//m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(orientation);
 		//m_ViewMatrix = glm::inverse(m_ViewMatrix);
-
+		
 	}
 
 	void Camera::MousePan(const glm::vec2& delta)
@@ -99,11 +100,11 @@ namespace Alalba {
 	void Camera::MouseZoom(float delta)
 	{
 		m_Distance -= delta * m_ZoomSpeed;
-		//if (m_Distance < 0.0f)
-		//{
-		//	m_FocalPoint += GetForwardDirection();
-		//	m_Distance = 0.0f;
-		//}
+		if (m_Distance < 0.0f)
+		{
+			m_FocalPoint += GetForwardDirection();
+			m_Distance = 0.0f;
+		}
 	}
 
 	glm::vec3 Camera::GetUpDirection()

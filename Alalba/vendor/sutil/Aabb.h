@@ -27,8 +27,8 @@
 //
 #pragma once
 
-#include <sutil/vec_math.h>
-#include <sutil/Matrix.h>
+#include <vec_math.h>
+#include <Matrix.h>
 
 
 #ifndef __CUDACC__

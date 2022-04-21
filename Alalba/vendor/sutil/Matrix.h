@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include <sutil/sutilapi.h>
-#include <sutil/Preprocessor.h>
-#include <sutil/vec_math.h>
+#include <sutilapi.h>
+#include <Preprocessor.h>
+#include <vec_math.h>
 
 #if !defined(__CUDACC_RTC__)
 #include <cmath>

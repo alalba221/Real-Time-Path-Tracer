@@ -17,7 +17,7 @@ namespace Alalba
 		unsigned int Height;
 
 		WindowProps(const std::string& title="Alalba Engine",
-			unsigned int width = 1280 * 2,
+			unsigned int width = 1280 *2 ,
 			unsigned int height = 720 * 2)
 			: Title(title),Width(width),Height(height)
 		{

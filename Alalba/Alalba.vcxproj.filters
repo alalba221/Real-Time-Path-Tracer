@@ -261,6 +261,9 @@
     <ClInclude Include="src\Alalba\Optix\LaunchParams.h">
       <Filter>src\Alalba\Optix</Filter>
     </ClInclude>
+    <ClInclude Include="src\Alalba\Optix\Material.h">
+      <Filter>src\Alalba\Optix</Filter>
+    </ClInclude>
     <ClInclude Include="src\Alalba\Optix\Model.h">
       <Filter>src\Alalba\Optix</Filter>
     </ClInclude>
