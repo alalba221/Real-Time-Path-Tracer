@@ -322,7 +322,7 @@ public:
 			ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		}
-		// Editor Panel ------------------------------------------------------------------------------
+	//	// Editor Panel ------------------------------------------------------------------------------
 
 		ImGui::Begin("Model");
 		ImGui::RadioButton("Spheres", (int*)&m_Scene, (int)Scene::Spheres);

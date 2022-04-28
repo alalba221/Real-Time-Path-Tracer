@@ -45,12 +45,15 @@ namespace Alalba {
     /*! resize frame buffer to given resolution */
     void resize(const vec2i& newSize);
     /*! download the rendered color buffer */
-    void downloadPixels(uint32_t h_pixels[]);
+    void downloadPixels(gdt::vec4f h_pixels[]);
 
     /*! set camera to render with */
     void setCamera(Camera& camera);
 
     void setLight();
+
+    bool denoiserOn = true;
+    bool accumulate = true;
    protected:
     // ------------------------------------------------------------------
     // internal helper functions
@@ -76,7 +79,7 @@ namespace Alalba {
 
     /*! does all setup for the hitgroup program(s) we are going to use */
     void createHitgroupPrograms();
-
+    void createCallablegroupPrograms();
     /*! assembles the full pipeline of all programs */
     void createPipeline();
 
@@ -115,15 +118,32 @@ namespace Alalba {
     CUDABuffer missRecordsBuffer;
     std::vector<OptixProgramGroup> hitgroupPGs;
     CUDABuffer hitgroupRecordsBuffer;
+    std::vector<OptixProgramGroup> callablePGs;
+    CUDABuffer callableRecordsBuffer;
+
     OptixShaderBindingTable sbt = {};
 
     /*! @{ our launch parameters, on the host, and the buffer to store
         them on the device */
+  public:
     LaunchParams launchParams;
+  protected:
     CUDABuffer   launchParamsBuffer;
     /*! @} */
 
-    CUDABuffer colorBuffer;
+    /*! the color buffer we use during _rendering_, which is a bit
+        larger than the actual displayed frame buffer (to account for
+        the border), and in float4 format (the denoiser requires
+        floats) */
+    CUDABuffer renderBuffer;
+
+    /*! the actual final color buffer used for display, in rgba8 */
+    CUDABuffer denoisedBuffer;
+
+    OptixDenoiser denoiser = nullptr;
+    CUDABuffer    denoiserScratch;
+    CUDABuffer    denoiserState;
+
 
     /*! the camera we are to render with. */
     Camera lastSetCamera;

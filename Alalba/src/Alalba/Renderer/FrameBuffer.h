@@ -8,7 +8,8 @@ namespace Alalba {
 	{
 		None = 0,
 		RGBA8 = 1,
-		RGBA16F = 2
+		RGBA16F = 2,
+		RGBA32F = 3
 	};
 
 	class FrameBuffer

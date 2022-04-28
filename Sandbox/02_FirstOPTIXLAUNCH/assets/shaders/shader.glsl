@@ -22,5 +22,12 @@ in vec2 TexCoord;
 uniform sampler2D u_Texture;
 void main()
 {
-	finalColor = texture(u_Texture,TexCoord);
+	//finalColor = texture(u_Texture,TexCoord);
+
+	const float gamma = 2.2;
+    vec3 hdrColor = texture(u_Texture, TexCoord).rgb;
+	vec3 mapped = vec3(1.0) - exp(-hdrColor * 0.1);
+	mapped = pow(mapped, vec3(1.0 / gamma));
+	finalColor = vec4(mapped, 1.0);
+  
 }

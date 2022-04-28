@@ -15,10 +15,10 @@ namespace Alalba {
 
   class Material {
   public:
-    Material() {};
     virtual ~Material() {}
     m_type type;
   };
+
   class Lambertian : public Material {
   public:
     Lambertian(const vec3f _albedo) : albedo(_albedo) { type = m_type::LAMBERTIAN; }
@@ -46,16 +46,27 @@ namespace Alalba {
     float roughness;
   };
 
+  class Glass : public Material {
+  public:
+    Glass(const vec3f _albedo, float _roughness)
+      : albedo(_albedo), roughness(_roughness)
+    {
+      type = m_type::METAL;
+    }
+    vec3f albedo;
+    float roughness;
+  };
+
   class Microfacet : public Material {
   public:
-    Microfacet(const float _roughness, const vec3f _albedo, const vec3f _kd)
-      : roughness(_roughness), albedo(_albedo), kd(_kd)
+    Microfacet(const float _roughness, const float _metallic, const vec3f _albedo, const vec3f _kd)
+      : roughness(_roughness), metallic(_metallic), albedo(_albedo), kd(_kd)
     {
       type = m_type::MICROFACET;
     }
     float roughness;
     vec3f albedo;
     vec3f kd;
+    float metallic;
   };
-
 }

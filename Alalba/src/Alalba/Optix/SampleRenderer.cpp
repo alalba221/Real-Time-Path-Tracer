@@ -60,30 +60,30 @@ namespace Alalba {
   struct __align__(OPTIX_SBT_RECORD_ALIGNMENT) RaygenRecord
   {
     __align__(OPTIX_SBT_RECORD_ALIGNMENT) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
-    // just a dummy value - later examples will use more interesting
-    // data here
     void* data;
   };
 
-  /*! SBT record for a miss program */
   struct __align__(OPTIX_SBT_RECORD_ALIGNMENT) MissRecord
   {
     __align__(OPTIX_SBT_RECORD_ALIGNMENT) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
-    // just a dummy value - later examples will use more interesting
-    // data here
-    void* data;
+    MissData data;
   };
 
-  /*! SBT record for a hitgroup program */
-  struct HitgroupRecord
+  struct __align__(OPTIX_SBT_RECORD_ALIGNMENT) HitgroupRecord
   {
     __align__(OPTIX_SBT_RECORD_ALIGNMENT) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
-    // just a dummy value - later examples will use more interesting
-    // data here
     TriangleMeshSBTData data;
-    //int objectID;
   };
 
+  struct __align__(OPTIX_SBT_RECORD_ALIGNMENT) CallableGroupRecord
+  {
+    __align__(OPTIX_SBT_RECORD_ALIGNMENT) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
+  };
+  //struct  RaygenRecord
+  //{
+  //  __align__(OPTIX_SBT_RECORD_ALIGNMENT) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
+  //  void* data;
+  //};
 
   /*! constructor - performs all setup, including initializing
     optix, creates module, pipeline, programs, SBT, etc. */
@@ -107,7 +107,7 @@ namespace Alalba {
     createMissPrograms();
     std::cout << "#osc: creating hitgroup programs ..." << std::endl;
     createHitgroupPrograms();
-
+    createCallablegroupPrograms();
     launchParams.traversable = buildAccel();
 
     std::cout << "#osc: setting up optix pipeline ..." << std::endl;
@@ -115,14 +115,15 @@ namespace Alalba {
 
     std::cout << "#osc: building SBT ..." << std::endl;
     buildSBT();
-
+    //std::cout << "#osc: Finish building SBT ..." << std::endl;
+    
     setLight();
 
     launchParamsBuffer.alloc(sizeof(launchParams));
     // init LaunchParames
     launchParams.subframe_index = 0;
-    launchParams.samples_per_launch = 16;
-
+    launchParams.samples_per_launch = 1;
+    launchParams.light_samples = 1;
 
     std::cout << "#osc: context, module, pipeline, etc, all set up ..." << std::endl;
 
@@ -504,7 +505,59 @@ namespace Alalba {
     }
   }
 
+  void SampleRenderer::createCallablegroupPrograms()
+  {
+    callablePGs.resize(CALLABLE_PGS);
+    std::vector<OptixProgramGroupDesc> pgDesc(CALLABLE_PGS);
+    OptixProgramGroupOptions pgOptions = {};
+    pgDesc[LAMBERTIAN_SAMPLE].kind = OPTIX_PROGRAM_GROUP_KIND_CALLABLES;
+    pgDesc[LAMBERTIAN_SAMPLE].callables.moduleDC = module;
+    pgDesc[LAMBERTIAN_SAMPLE].callables.entryFunctionNameDC = "__direct_callable__lambertian_sample";
 
+    pgDesc[LAMBERTIAN_PDF].kind = OPTIX_PROGRAM_GROUP_KIND_CALLABLES;
+    pgDesc[LAMBERTIAN_PDF].callables.moduleDC = module;
+    pgDesc[LAMBERTIAN_PDF].callables.entryFunctionNameDC = "__direct_callable__lambertian_pdf";
+
+    pgDesc[LAMBERTIAN_EVAL].kind = OPTIX_PROGRAM_GROUP_KIND_CALLABLES;
+    pgDesc[LAMBERTIAN_EVAL].callables.moduleDC = module;
+    pgDesc[LAMBERTIAN_EVAL].callables.entryFunctionNameDC = "__direct_callable__lambertian_eval";
+
+    pgDesc[MICROFACET_SAMPLE].kind = OPTIX_PROGRAM_GROUP_KIND_CALLABLES;
+    pgDesc[MICROFACET_SAMPLE].callables.moduleDC = module;
+    pgDesc[MICROFACET_SAMPLE].callables.entryFunctionNameDC = "__direct_callable__microfacet_sample";
+
+    pgDesc[MICROFACET_PDF].kind = OPTIX_PROGRAM_GROUP_KIND_CALLABLES;
+    pgDesc[MICROFACET_PDF].callables.moduleDC = module;
+    pgDesc[MICROFACET_PDF].callables.entryFunctionNameDC = "__direct_callable__microfacet_pdf";
+
+    pgDesc[MICROFACET_EVAL].kind = OPTIX_PROGRAM_GROUP_KIND_CALLABLES;
+    pgDesc[MICROFACET_EVAL].callables.moduleDC = module;
+    pgDesc[MICROFACET_EVAL].callables.entryFunctionNameDC = "__direct_callable__microfacet_eval";
+
+    pgDesc[METAL_SAMPLE].kind = OPTIX_PROGRAM_GROUP_KIND_CALLABLES;
+    pgDesc[METAL_SAMPLE].callables.moduleDC = module;
+    pgDesc[METAL_SAMPLE].callables.entryFunctionNameDC = "__direct_callable__metal_sample";
+
+    pgDesc[METAL_PDF].kind = OPTIX_PROGRAM_GROUP_KIND_CALLABLES;
+    pgDesc[METAL_PDF].callables.moduleDC = module;
+    pgDesc[METAL_PDF].callables.entryFunctionNameDC = "__direct_callable__metal_pdf";
+
+    pgDesc[METAL_EVAL].kind = OPTIX_PROGRAM_GROUP_KIND_CALLABLES;
+    pgDesc[METAL_EVAL].callables.moduleDC = module;
+    pgDesc[METAL_EVAL].callables.entryFunctionNameDC = "__direct_callable__metal_eval";
+
+    char log[2048];
+    size_t sizeof_log = sizeof(log);
+    OPTIX_CHECK(optixProgramGroupCreate(
+      optixContext,
+      pgDesc.data(),
+      CALLABLE_PGS,
+      &pgOptions,
+      log,
+      &sizeof_log,
+      callablePGs.data()
+    ));
+  }
   /*! assembles the full pipeline of all programs */
   // link shaders
   void SampleRenderer::createPipeline()
@@ -516,7 +569,9 @@ namespace Alalba {
       programGroups.push_back(pg);
     for (auto pg : hitgroupPGs)
       programGroups.push_back(pg);
-
+    for (auto pg : callablePGs) {
+      programGroups.push_back(pg);
+    }
     char log[2048];
     size_t sizeof_log = sizeof(log);
     OPTIX_CHECK(optixPipelineCreate(optixContext,
@@ -563,6 +618,7 @@ namespace Alalba {
     raygenRecordsBuffer.alloc_and_upload(raygenRecords);
     sbt.raygenRecord = raygenRecordsBuffer.d_pointer();
 
+    
     // ------------------------------------------------------------------
     // build miss records
     // ------------------------------------------------------------------
@@ -570,7 +626,7 @@ namespace Alalba {
     for (int i = 0; i < missPGs.size(); i++) {
       MissRecord rec;
       OPTIX_CHECK(optixSbtRecordPackHeader(missPGs[i], &rec));
-      rec.data = nullptr; /* for now ... */
+      rec.data.bg_color = vec3f(0.f);
       missRecords.push_back(rec);
     }
     missRecordsBuffer.alloc_and_upload(missRecords);
@@ -598,12 +654,34 @@ namespace Alalba {
           case m_type::LAMBERTIAN:
             rec.data.albedo = ((Lambertian*)(model->meshes[meshID]->material))->albedo;
             rec.data.emission = gdt::vec3f(0.f);
+            rec.data.eval_id = LAMBERTIAN_EVAL;
+            rec.data.sample_id = LAMBERTIAN_SAMPLE;
+            rec.data.pdf_id = LAMBERTIAN_PDF;
+            rec.data.kd = vec3f(1.f);
             //rec.data.kd = gdt::vec3f(1.f);
             break;
           case m_type::LIGHT:
+            rec.data.eval_id = LAMBERTIAN_EVAL;
+            rec.data.sample_id = LAMBERTIAN_SAMPLE;
+            rec.data.pdf_id = LAMBERTIAN_PDF;
             rec.data.emission = ((Diffuse_light*)(model->meshes[meshID]->material))->emit;
-            //rec.data.kd = gdt::vec3f(1.f);
+            rec.data.kd = vec3f(1.f);
             break;
+          case m_type::MICROFACET:
+            {
+              Microfacet* p = (Microfacet*)(model->meshes[meshID]->material);
+              rec.data.eval_id = MICROFACET_EVAL;
+              rec.data.sample_id = MICROFACET_SAMPLE;
+              rec.data.pdf_id = MICROFACET_PDF;
+              rec.data.roughness = p->roughness;
+              rec.data.metallic = p->metallic;
+              rec.data.albedo = p->albedo;
+              rec.data.kd = p->kd;
+            
+            }
+            break;
+          default:
+            assert(0);
         }
         hitgroupRecords.push_back(rec);
       }
@@ -612,6 +690,22 @@ namespace Alalba {
     sbt.hitgroupRecordBase = hitgroupRecordsBuffer.d_pointer();
     sbt.hitgroupRecordStrideInBytes = sizeof(HitgroupRecord);
     sbt.hitgroupRecordCount = (int)hitgroupRecords.size();
+
+    
+    // callable records
+    std::vector<CallableGroupRecord> callableRecords;
+    for (int i = 0; i < callablePGs.size(); i++) 
+    {
+      CallableGroupRecord rec;
+      OPTIX_CHECK(optixSbtRecordPackHeader(callablePGs[i], &rec));
+      callableRecords.push_back(rec); 
+    }
+    callableRecordsBuffer.alloc_and_upload(callableRecords);
+    
+    sbt.callablesRecordBase = callableRecordsBuffer.d_pointer();
+    sbt.callablesRecordStrideInBytes = sizeof(CallableGroupRecord);
+    sbt.callablesRecordCount = (int)callableRecords.size();
+    
   }
 
 
@@ -621,10 +715,13 @@ namespace Alalba {
   {
     // sanity check: make sure we launch only after first resize is
     // already done:
-    if (launchParams.frame.size.x == 0) return;
-    launchParams.frame.accumID++;
-    launchParamsBuffer.upload(&launchParams, 1);
+    if (launchParams.frame.size.x == 0) 
+      return;
+    if (!accumulate)
+      launchParams.frame.frameID = 0;
 
+    launchParamsBuffer.upload(&launchParams, 1);
+    launchParams.frame.frameID++;
 
     OPTIX_CHECK(optixLaunch(/*! pipeline we're launching launch: */
       pipeline, stream,
@@ -637,11 +734,75 @@ namespace Alalba {
       launchParams.frame.size.y,
       1
     ));
-    // sync - make sure the frame is rendered before we download and
-    // display (obviously, for a high-performance application you
-    // want to use streams and double-buffering, but for this simple
-    // example, this will have to do)
-    //launchParams.subframe_index++;
+
+    OptixDenoiserParams denoiserParams;
+    denoiserParams.denoiseAlpha = 1;
+    denoiserParams.hdrIntensity = (CUdeviceptr)0;
+    if (accumulate)
+      denoiserParams.blendFactor = 1.f / (launchParams.frame.frameID);
+    else
+      denoiserParams.blendFactor = 0.0f;
+    // -------------------------------------------------------
+    OptixImage2D inputLayer;
+    inputLayer.data = renderBuffer.d_pointer();
+    /// Width of the image (in pixels)
+    inputLayer.width = launchParams.frame.size.x;
+    /// Height of the image (in pixels)
+    inputLayer.height = launchParams.frame.size.y;
+    /// Stride between subsequent rows of the image (in bytes).
+    inputLayer.rowStrideInBytes = launchParams.frame.size.x * sizeof(float4);
+    /// Stride between subsequent pixels of the image (in bytes).
+    /// For now, only 0 or the value that corresponds to a dense packing of pixels (no gaps) is supported.
+    inputLayer.pixelStrideInBytes = sizeof(float4);
+    /// Pixel format.
+    inputLayer.format = OPTIX_PIXEL_FORMAT_FLOAT4;
+
+    // -------------------------------------------------------
+    OptixImage2D outputLayer;
+    outputLayer.data = denoisedBuffer.d_pointer();
+    /// Width of the image (in pixels)
+    outputLayer.width = launchParams.frame.size.x;
+    /// Height of the image (in pixels)
+    outputLayer.height = launchParams.frame.size.y;
+    /// Stride between subsequent rows of the image (in bytes).
+    outputLayer.rowStrideInBytes = launchParams.frame.size.x * sizeof(float4);
+    /// Stride between subsequent pixels of the image (in bytes).
+    /// For now, only 0 or the value that corresponds to a dense packing of pixels (no gaps) is supported.
+    outputLayer.pixelStrideInBytes = sizeof(float4);
+    /// Pixel format.
+    outputLayer.format = OPTIX_PIXEL_FORMAT_FLOAT4;
+
+    // -------------------------------------------------------
+    if (denoiserOn) {
+      OptixDenoiserGuideLayer denoiserGuideLayer = {};
+
+      OptixDenoiserLayer denoiserLayer = {};
+      denoiserLayer.input = inputLayer;
+      denoiserLayer.output = outputLayer;
+
+      OPTIX_CHECK(optixDenoiserInvoke(denoiser,
+        /*stream*/0,
+        &denoiserParams,
+        denoiserState.d_pointer(),
+        denoiserState.sizeInBytes,
+        &denoiserGuideLayer,
+        &denoiserLayer, 1,
+        /*inputOffsetX*/0,
+        /*inputOffsetY*/0,
+        denoiserScratch.d_pointer(),
+        denoiserScratch.sizeInBytes));
+    }
+    else {
+      cudaMemcpy((void*)outputLayer.data, (void*)inputLayer.data,
+        outputLayer.width * outputLayer.height * sizeof(float4),
+        cudaMemcpyDeviceToDevice);
+    }
+    /// ---------------------------------------------------------------
+    /// sync - make sure the frame is rendered before we download and
+    /// display (obviously, for a high-performance application you
+    /// want to use streams and double-buffering, but for this simple
+    /// example, this will have to do)
+    /// ---------------------------------------------------------------
     CUDA_SYNC_CHECK();
   }
 
@@ -659,11 +820,8 @@ namespace Alalba {
   // also set Alalba::camera from glm to gdt
   void SampleRenderer::setCamera(Camera& camera)
   {
-    if (!camera.m_Changed)
-      return;
-
-    launchParams.subframe_index = 0;
-    //camera.m_Changed = false;
+    // reset accumulation
+    launchParams.frame.frameID = 0;
 
     lastSetCamera = camera;
     launchParams.camera.position = vec3f(camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
@@ -686,23 +844,51 @@ namespace Alalba {
   /*! resize frame buffer to given resolution */
   void SampleRenderer::resize(const vec2i& newSize)
   {
-    // if window minimized
-    if (newSize.x == 0 || newSize.y == 0) return;
+    if (denoiser) {
+      OPTIX_CHECK(optixDenoiserDestroy(denoiser));
+    };
+
+    // ------------------------------------------------------------------
+    // create the denoiser:
+    OptixDenoiserOptions denoiserOptions = {};
+
+
+    OPTIX_CHECK(optixDenoiserCreate(optixContext, OPTIX_DENOISER_MODEL_KIND_LDR, &denoiserOptions, &denoiser));
+
+    // .. then compute and allocate memory resources for the denoiser
+    OptixDenoiserSizes denoiserReturnSizes;
+    OPTIX_CHECK(optixDenoiserComputeMemoryResources(denoiser, newSize.x, newSize.y,
+      &denoiserReturnSizes));
+    denoiserScratch.resize(std::max(denoiserReturnSizes.withOverlapScratchSizeInBytes,
+      denoiserReturnSizes.withoutOverlapScratchSizeInBytes));
+
+    denoiserState.resize(denoiserReturnSizes.stateSizeInBytes);
+
+    // ------------------------------------------------------------------
     // resize our cuda frame buffer
-    colorBuffer.resize(newSize.x * newSize.y * sizeof(uint32_t));
+    denoisedBuffer.resize(newSize.x * newSize.y * sizeof(float4));
+    renderBuffer.resize(newSize.x * newSize.y * sizeof(float4));
 
     // update the launch parameters that we'll pass to the optix
     // launch:
     launchParams.frame.size = newSize;
-    launchParams.frame.colorBuffer = (uint32_t*)colorBuffer.d_pointer();
+    launchParams.frame.colorBuffer = (float4*)renderBuffer.d_pointer();
 
     // and re-set the camera, since aspect may have changed
     setCamera(lastSetCamera);
+
+    // ------------------------------------------------------------------
+    OPTIX_CHECK(optixDenoiserSetup(denoiser, 0,
+      newSize.x, newSize.y,
+      denoiserState.d_pointer(),
+      denoiserState.sizeInBytes,
+      denoiserScratch.d_pointer(),
+      denoiserScratch.sizeInBytes));
   }
   /*! download the rendered color buffer */
-  void SampleRenderer::downloadPixels(uint32_t h_pixels[])
+  void SampleRenderer::downloadPixels(gdt::vec4f h_pixels[])
   {
-    colorBuffer.download(h_pixels,
+    denoisedBuffer.download(h_pixels,
       launchParams.frame.size.x * launchParams.frame.size.y);
   }
 

@@ -1,4 +1,4 @@
-// ======================================================================== //
+﻿// ======================================================================== //
 // Copyright 2018-2019 Ingo Wald                                            //
 //                                                                          //
 // Licensed under the Apache License, Version 2.0 (the "License");          //
@@ -17,8 +17,12 @@
 #pragma once
 #include "math/vec.h"
 #include <vector_types.h>
-#include <curand_kernel.h>
 #include"random/random.h"
+////
+//#include <sal.h>
+//#include <thrust/device_vector.h>
+//#include <device_launch_parameters.h>
+//#include <curand_kernel.h>
 namespace Alalba {
 
   struct TriangleMeshSBTData {
@@ -26,7 +30,28 @@ namespace Alalba {
     gdt::vec3i* index;
     gdt::vec3f  albedo;
     gdt::vec3f emission;
+    gdt::vec3f kd;
+    float roughness;
+    float metallic;
+    int pdf_id, sample_id, eval_id;
   };
+
+  struct MissData {
+    gdt::vec3f bg_color;
+  };
+
+  enum {
+    LAMBERTIAN_SAMPLE = 0,
+    LAMBERTIAN_PDF,
+    LAMBERTIAN_EVAL,
+    MICROFACET_SAMPLE,
+    MICROFACET_PDF,
+    MICROFACET_EVAL,
+    METAL_SAMPLE,
+    METAL_PDF,
+    METAL_EVAL,
+    CALLABLE_PGS,
+  }; // callable id
 
   enum
   {
@@ -45,10 +70,12 @@ namespace Alalba {
   struct LaunchParams
   {
     struct {
-      uint32_t* colorBuffer;
-      uint32_t* accum_buffer;
+      float4* colorBuffer;
+      // uint32_t* accum_buffer;
+      // uint32_t* colorBuffer;
+      // uint32_t* accum_buffer;
       gdt::vec2i size;
-      int       accumID{ 0 };
+      int       frameID = 0;
     } frame;
 
     struct {

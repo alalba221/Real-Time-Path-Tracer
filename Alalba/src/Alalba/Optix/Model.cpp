@@ -110,7 +110,7 @@ namespace Alalba {
 
         for (int faceID = 0; faceID < shape.mesh.material_ids.size(); faceID++)
         {
-          if (shape.mesh.material_ids[faceID] != materialID) continue;
+          //if (shape.mesh.material_ids[faceID] != materialID) continue;
           tinyobj::index_t idx0 = shape.mesh.indices[3 * faceID + 0];
           tinyobj::index_t idx1 = shape.mesh.indices[3 * faceID + 1];
           tinyobj::index_t idx2 = shape.mesh.indices[3 * faceID + 2];
@@ -134,9 +134,9 @@ namespace Alalba {
 
     // of course, you should be using tbb::parallel_for for stuff
     // like this:
-    for (auto mesh : model->meshes)
+  /*  for (auto mesh : model->meshes)
       for (auto vtx : mesh->vertex)
-        model->bounds.extend(vtx);
+        model->bounds.extend(vtx);*/
 
     std::cout << "created a total of " << model->meshes.size() << " meshes" << std::endl;
     return model;
