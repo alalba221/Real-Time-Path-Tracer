@@ -1295,7 +1295,7 @@ $L__BB15_4:
 	fma.rn.ftz.f32 	%f136, %f108, %f107, %f102;
 	ld.local.u32 	%r276, [%rd1+-8];
 	setp.ne.s32 	%p2, %r276, 0;
-	setp.gt.u32 	%p3, %r289, 2;
+	setp.gt.u32 	%p3, %r289, 5;
 	or.pred  	%p4, %p3, %p2;
 	@%p4 bra 	$L__BB15_6;
 	bra.uni 	$L__BB15_5;

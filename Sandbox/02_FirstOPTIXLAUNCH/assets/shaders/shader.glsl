@@ -23,11 +23,14 @@ uniform sampler2D u_Texture;
 void main()
 {
 	//finalColor = texture(u_Texture,TexCoord);
-
+	/// Gamma correct
 	const float gamma = 2.2;
     vec3 hdrColor = texture(u_Texture, TexCoord).rgb;
-	vec3 mapped = vec3(1.0) - exp(-hdrColor * 0.1);
-	mapped = pow(mapped, vec3(1.0 / gamma));
-	finalColor = vec4(mapped, 1.0);
+	finalColor = vec4(pow(hdrColor, vec3(1.0 / gamma)),1.0);
+
+	/// Tone mapping
+//	vec3 mapped = vec3(1.0) - exp(-hdrColor * 0.1);
+//	mapped = pow(mapped, vec3(1.0 / gamma));
+//	finalColor = vec4(mapped, 1.0);
   
 }

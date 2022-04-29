@@ -811,7 +811,7 @@ namespace Alalba {
   void SampleRenderer::setLight()
   {
     launchParams.light.corner = gdt::vec3f(213.f, 548.7f, 227.f);
-    launchParams.light.emission = gdt::vec3f(15.f, 15.f, 15.f);
+    launchParams.light.emission = gdt::vec3f(1.f, 1.f, 1.f);
     launchParams.light.v1 = gdt::vec3f(130.f, 0.f, 0.f);
     launchParams.light.v2 = gdt::vec3f(0.f, 0.f, 105.f);
     launchParams.light.normal = gdt::normalize(gdt::cross(launchParams.light.v1, launchParams.light.v2));

@@ -396,7 +396,7 @@ namespace Alalba {
         shade += prd.emitted;
         shade += prd.radiance * (prd.attenuation);
         
-        if (prd.done || depth >= 3)
+        if (prd.done || depth >= 6)
           break;
         
         ray_origin = prd.origin;

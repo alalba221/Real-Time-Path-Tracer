@@ -538,7 +538,7 @@ public:
     Diffuse_light* light = new Diffuse_light(gdt::vec3f(15.f, 15.f, 15.f));
    
     Microfacet* shortbox= new Microfacet(0.1, 0.9, vec3f(.8f, .7f, .8f), vec3f(0.5f, 0.5f, 0.5f));
-    Microfacet* tallbox = new Microfacet(0.1, 0.9, vec3f(.8f, .7f, .1f), vec3f(0.7f, 0.7f, 0.7f));
+    Microfacet* tallbox = new Microfacet(0.1, 0.9, vec3f(.8f, .7f, .8f), vec3f(0.7f, 0.7f, 0.7f));
 		Microfacet* bunny		=	new Microfacet(0.1, 0.9, vec3f(.1f, .7f, .8f), vec3f(0.5f, 0.5f, 0.5f));
 		
 
