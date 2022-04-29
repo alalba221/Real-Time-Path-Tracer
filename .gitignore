@@ -11,4 +11,9 @@
 **/imgui.ini
 **.bak
 **.sln
+<<<<<<< HEAD
 **.vcxproj
+=======
+**.vcxproj
+**.filters
+>>>>>>> main
