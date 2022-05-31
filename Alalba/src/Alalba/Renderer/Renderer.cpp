@@ -36,7 +36,7 @@ namespace Alalba {
 	void Renderer::DrawIndexed(unsigned int count, bool depthTest)
 	{
 		ALALBA_RENDER_2(count, depthTest,{
-			RendererAPI::DrawIndexed(count);
+			RendererAPI::DrawIndexed(count,depthTest);
 		});
 	}
 
