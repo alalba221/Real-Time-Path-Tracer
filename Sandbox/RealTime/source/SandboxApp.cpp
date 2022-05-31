@@ -27,6 +27,7 @@ class EditorLayer : public Alalba::Layer
 public:
 	EditorLayer()
 		: Layer("Example"),
+		m_ClearColor{ 0.1f, 0.1f, 0.1f, 1.0f },
 		m_Scene(Scene::Spheres),
 		m_Camera(glm::perspectiveFov(glm::radians(45.0f), 1280.0f, 720.0f, 0.1f, 10000.0f))
 	{
@@ -38,14 +39,22 @@ public:
 	virtual void OnAttach () override
 	{
 
-		m_SimplePBRShader.reset(Alalba::Shader::Create("assets/shaders/pbr.glsl"));
-		m_Shader.reset(Alalba::Shader::Create("assets/shaders/shader.glsl"));
+		m_SimplePBRShader.reset(Alalba::Shader::Create("assets/shaders/simplepbr.glsl"));
+		m_QuadShader.reset(Alalba::Shader::Create("assets/shaders/quad.glsl"));
+		m_HDRShader.reset(Alalba::Shader::Create("assets/shaders/hdr.glsl"));
+		//m_Shader.reset(Alalba::Shader::Create("assets/shaders/shader.glsl"));
 		m_Mesh.reset(new Alalba::Mesh("assets/meshes/cerberus.fbx"));
 		m_SphereMesh.reset(new Alalba::Mesh("assets/models/Sphere.fbx"));
 		
 		// Editor
 		m_CheckerboardTex.reset(Alalba::Texture2D::Create("assets/editor/Checkerboard.tga"));
 		
+		// Environment
+		m_EnvironmentCubeMap.reset(Alalba::TextureCube::Create("assets/textures/environments/Arches_E_PineTree_Radiance.tga"));
+		m_EnvironmentIrradiance.reset(Alalba::TextureCube::Create("assets/textures/environments/Arches_E_PineTree_Irradiance.tga"));
+		m_BRDFLUT.reset(Alalba::Texture2D::Create("assets/textures/BRDF_LUT.tga"));
+
+
 		m_FrameBuffer.reset(Alalba::FrameBuffer::Create(1280*2, 720*2, Alalba::FrameBufferFormat::RGBA16F));
 		m_FinalPresentBuffer.reset(Alalba::FrameBuffer::Create(1280*2, 720*2, Alalba::FrameBufferFormat::RGBA8));
 		
@@ -88,6 +97,9 @@ public:
 
 	void OnUpdate() override
 	{
+		using namespace Alalba;
+		using namespace glm;
+
 		// THINGS TO LOOK AT:
 		// - BRDF LUT
 		// - Cubemap mips and filtering
@@ -95,46 +107,41 @@ public:
 
 		m_Camera.Update();
 		auto viewProjection = m_Camera.GetProjectionMatrix() * m_Camera.GetViewMatrix();
-		// 
-		m_FrameBuffer->Bind();
-		Alalba::Renderer::Clear();
 		
-		//Alalba::UniformBufferDeclaration<sizeof(glm::mat4), 1> quadShaderUB;
-		//quadShaderUB.Push("u_ViewProjectionMatrix", glm::inverse(viewProjection));
-		//m_QuadShader->UploadUniformBuffer(quadShaderUB);
-		//m_QuadShader->Bind();
-		//m_EnvironmentIrradiance->Bind(0);
-		//m_VertexBuffer->Bind();
-		//m_IndexBuffer->Bind();
-		//Alalba::Renderer::DrawIndexed(m_IndexBuffer->GetCount(), false);
+		m_FrameBuffer->Bind();
+		Alalba::Renderer::Clear(m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], m_ClearColor[3]);;
+		
+		Alalba::UniformBufferDeclaration<sizeof(glm::mat4), 1> quadShaderUB;
+		//quadShaderUB.Push("u_InverseVP", viewProjection);
+		quadShaderUB.Push("u_InverseVP", glm::inverse(viewProjection));
+		m_QuadShader->UploadUniformBuffer(quadShaderUB);
+		m_QuadShader->Bind();
+		m_EnvironmentIrradiance->Bind(0);
+		m_VertexBuffer->Bind();
+		m_IndexBuffer->Bind();
+		Alalba::Renderer::DrawIndexed(m_IndexBuffer->GetCount(), false);
 
 		Alalba::UniformBufferDeclaration<sizeof(glm::mat4) * 2 + sizeof(glm::vec3) * 4 + sizeof(float) * 8, 14> simplePbrShaderUB;
-		
 		simplePbrShaderUB.Push("u_ViewProjectionMatrix", viewProjection);
-		simplePbrShaderUB.Push("u_ModelMatrix", glm::mat4(1.0f));
+		simplePbrShaderUB.Push("u_ModelMatrix", mat4(1.0f));
 		simplePbrShaderUB.Push("u_AlbedoColor", m_AlbedoInput.Color);
 		simplePbrShaderUB.Push("u_Metalness", m_MetalnessInput.Value);
 		simplePbrShaderUB.Push("u_Roughness", m_RoughnessInput.Value);
-		simplePbrShaderUB.Push("u_AO", m_AOInput.Value);
-
-	//	simplePbrShaderUB.Push("lights.Position", m_Light.Position);
-		simplePbrShaderUB.Push("lights.Color", m_Light.Color);
 		simplePbrShaderUB.Push("lights.Direction", m_Light.Direction);
-	//simplePbrShaderUB.Push("lights.Radiance", m_Light.Radiance * m_LightMultiplier);
-
+		simplePbrShaderUB.Push("lights.Radiance", m_Light.Radiance * m_LightMultiplier);
 		simplePbrShaderUB.Push("u_CameraPosition", m_Camera.GetPosition());
-	//	simplePbrShaderUB.Push("u_RadiancePrefilter", m_RadiancePrefilter ? 1.0f : 0.0f);
+		simplePbrShaderUB.Push("u_RadiancePrefilter", m_RadiancePrefilter ? 1.0f : 0.0f);
 		simplePbrShaderUB.Push("u_AlbedoTexToggle", m_AlbedoInput.UseTexture ? 1.0f : 0.0f);
 		simplePbrShaderUB.Push("u_NormalTexToggle", m_NormalInput.UseTexture ? 1.0f : 0.0f);
 		simplePbrShaderUB.Push("u_MetalnessTexToggle", m_MetalnessInput.UseTexture ? 1.0f : 0.0f);
 		simplePbrShaderUB.Push("u_RoughnessTexToggle", m_RoughnessInput.UseTexture ? 1.0f : 0.0f);
-		simplePbrShaderUB.Push("u_AOTexToggle", m_AOInput.UseTexture ? 1.0f : 0.0f);
-	//	simplePbrShaderUB.Push("u_EnvMapRotation", m_EnvMapRotation);
+		simplePbrShaderUB.Push("u_EnvMapRotation", m_EnvMapRotation);
 		m_SimplePBRShader->UploadUniformBuffer(simplePbrShaderUB);
 
-		//m_EnvironmentCubeMap->Bind(10);
-		//m_EnvironmentIrradiance->Bind(11);
-		//m_BRDFLUT->Bind(15);
+
+		m_EnvironmentCubeMap->Bind(10);
+		m_EnvironmentIrradiance->Bind(11);
+		m_BRDFLUT->Bind(15);
 
 		m_SimplePBRShader->Bind();
 		
@@ -159,7 +166,6 @@ public:
 				m_SimplePBRShader->SetMat4("u_ModelMatrix", glm::translate(glm::mat4(1.0f), glm::vec3(x, 0.0f, 0.0f)));
 				m_SimplePBRShader->SetFloat("u_Roughness", roughness);
 				m_SimplePBRShader->SetFloat("u_Metalness", 1.0f);
-				m_SimplePBRShader->SetFloat("u_AO", 1.0f);
 				m_SphereMesh->Render();
 
 				roughness += 0.15f;
@@ -174,7 +180,6 @@ public:
 				m_SimplePBRShader->SetMat4("u_ModelMatrix", glm::translate(glm::mat4(1.0f), glm::vec3(x, 22.0f, 0.0f)));
 				m_SimplePBRShader->SetFloat("u_Roughness", roughness);
 				m_SimplePBRShader->SetFloat("u_Metalness", 0.0f);
-				m_SimplePBRShader->SetFloat("u_AO", 1.0f);
 				m_SphereMesh->Render();
 
 				roughness += 0.15f;
@@ -191,9 +196,8 @@ public:
 		// 
 		m_FinalPresentBuffer->Bind();
 		Alalba::Renderer::Clear();
-		//m_HDRShader->Bind();
-		//m_HDRShader->SetFloat("u_Exposure", m_Exposure);
-		m_Shader->Bind();
+		m_HDRShader->Bind();
+		m_HDRShader->SetFloat("u_Exposure", m_Exposure);
 		m_FrameBuffer->BindTexture();
 		m_VertexBuffer->Bind();
 		m_IndexBuffer->Bind();
@@ -331,25 +335,17 @@ public:
 		ImGui::ColorEdit4("Clear Color", m_ClearColor);
 
 		ImGui::Begin("Environment");
-	/*	ImGui::SliderFloat3("Light Dir", glm::value_ptr(m_Light.Direction), -1, 1);
-		ImGui::ColorEdit3("Light Radiance", glm::value_ptr(m_Light.Radiance));
-		ImGui::SliderFloat3("Light POS", glm::value_ptr(m_Light.Position), -100, 100);
-		ImGui::ColorEdit3("Light Color", glm::value_ptr(m_Light.Color));
-		ImGui::SliderFloat("Light Multiplier", &m_LightMultiplier, 0.0f, 5.0f);
-		ImGui::SliderFloat("Exposure", &m_Exposure, 0.0f, 10.0f);*/
 
 		ImGui::Columns(2);
 		ImGui::AlignTextToFramePadding();
 
 		Property("Light Direction", m_Light.Direction);
 		Property("Light Radiance", m_Light.Radiance, PropertyFlag::ColorProperty);
-		Property("Light Position", m_Light.Position,-100,100);
-		Property("Light Color", m_Light.Color, PropertyFlag::ColorProperty);
 		Property("Light Multiplier", m_LightMultiplier, 0.0f, 5.0f);
 		Property("Exposure", m_Exposure, 0.0f, 5.0f);
 
-		//Property("Radiance Prefiltering", m_RadiancePrefilter);
-		//Property("Env Map Rotation", m_EnvMapRotation, -360.0f, 360.0f);
+		Property("Radiance Prefiltering", m_RadiancePrefilter);
+		Property("Env Map Rotation", m_EnvMapRotation, -360.0f, 360.0f);
 
 		ImGui::Columns(1);
 
@@ -624,7 +620,6 @@ public:
 	
 		glm::vec4 m_TriangleColor;
 
-		std::unique_ptr<Alalba::Shader> m_Shader;
 		std::unique_ptr<Alalba::Shader> m_PBRShader;
 		std::unique_ptr<Alalba::Shader> m_SimplePBRShader;
 		std::unique_ptr<Alalba::Shader> m_QuadShader;
@@ -682,10 +677,8 @@ public:
 
 		struct Light
 		{
-			glm::vec3 Position;
 			glm::vec3 Direction;
 			glm::vec3 Radiance;
-			glm::vec3 Color = glm::vec3{0,0,0};
 		};
 		Light m_Light;
 		float m_LightMultiplier = 0.3f;
@@ -714,8 +707,12 @@ public:
 	//std::shared_ptr<Alalba::Layer> optix;
   Sandbox()
   {
-    PushLayer(new EditorLayer());
+		ALALBA_APP_TRACE("Hello!!");
   };
+	virtual void OnInit() override
+	{
+		PushLayer(new EditorLayer());
+	}
 
   ~Sandbox(){};
 };

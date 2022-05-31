@@ -31,40 +31,6 @@ namespace Alalba {
     Random random;
   };
 
- /* struct Onb
-  {
-    __forceinline__ __device__ Onb(const gdt::vec3f& normal)
-    {
-      m_normal = normal;
-
-      if (fabs(m_normal.x) > fabs(m_normal.z))
-      {
-        m_binormal.x = -m_normal.y;
-        m_binormal.y = m_normal.x;
-        m_binormal.z = 0;
-      }
-      else
-      {
-        m_binormal.x = 0;
-        m_binormal.y = -m_normal.z;
-        m_binormal.z = m_normal.y;
-      }
-
-      m_binormal = normalize(m_binormal);
-      m_tangent = cross(m_binormal, m_normal);
-    }
-
-    __forceinline__ __device__ void inverse_transform(gdt::vec3f& p) const
-    {
-      p = p.x * m_tangent + p.y * m_binormal + p.z * m_normal;
-    }
-
-    gdt::vec3f m_tangent;
-    gdt::vec3f m_binormal;
-    gdt::vec3f m_normal;
-  };*/
-
-
   //------------------------------------------------------------------------------
   //
   //
@@ -148,7 +114,9 @@ namespace Alalba {
       tmax,
       0.0f,                    // rayTime
       OptixVisibilityMask(1),
-      OPTIX_RAY_FLAG_TERMINATE_ON_FIRST_HIT,
+      OPTIX_RAY_FLAG_DISABLE_ANYHIT
+      | OPTIX_RAY_FLAG_TERMINATE_ON_FIRST_HIT
+      | OPTIX_RAY_FLAG_DISABLE_CLOSESTHIT,
       RAY_TYPE_OCCLUSION,      // SBT offset
       RAY_TYPE_COUNT,          // SBT stride
       RAY_TYPE_OCCLUSION,      // missSBTIndex
@@ -614,7 +582,7 @@ namespace Alalba {
     }
   }
 
-  extern "C" __device__ gdt::vec3f __direct_callable__metal_sample(
+  extern "C" __device__ gdt::vec3f __direct_callable__bsdf_sample(
     RadiancePRD * prd,
     const gdt::vec3f & surface_noraml,
     const TriangleMeshSBTData & sbt,
@@ -625,7 +593,7 @@ namespace Alalba {
     return scattered;//toWorld(surface_noraml, scattered);
   }
 
-  extern "C" __device__ float __direct_callable__metal_pdf(
+  extern "C" __device__ float __direct_callable__bsdf_pdf(
     RadiancePRD * prd,
     const gdt::vec3f & scattered,
     const gdt::vec3f & surface_noraml,
@@ -636,7 +604,7 @@ namespace Alalba {
     return 1.0f;
   }
 
-  extern "C" __device__ gdt::vec3f __direct_callable__metal_eval(
+  extern "C" __device__ gdt::vec3f __direct_callable__bsdf_eval(
     RadiancePRD * prd,
     const gdt::vec3f & scattered,
     const gdt::vec3f & surface_noraml,

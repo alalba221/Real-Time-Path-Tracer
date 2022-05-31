@@ -10,7 +10,8 @@ void main()
 {
 	vec4 position = vec4(a_Position.xy, 1.0, 1.0);
 	v_TexCoord = a_TexCoord;
-	gl_Position = position;
+	//gl_Position = position;
+	gl_Position = vec4(a_Position, 1.0);
 }
 
 #type fragment

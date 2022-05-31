@@ -10,6 +10,7 @@ namespace Alalba {
     LAMBERTIAN,
     METAL,
     LIGHT,
+    BSDF,
     MICROFACET
   };
 
@@ -46,15 +47,16 @@ namespace Alalba {
     float roughness;
   };
 
-  class Glass : public Material {
+  class BSDF : public Material {
   public:
-    Glass(const vec3f _albedo, float _roughness)
-      : albedo(_albedo), roughness(_roughness)
+    BSDF(const vec3f _albedo, float _roughness, float _eta = 1.3f)
+      : albedo(_albedo), roughness(_roughness), eta(_eta)
     {
-      type = m_type::METAL;
+      type = m_type::BSDF;
     }
     vec3f albedo;
     float roughness;
+    float eta;
   };
 
   class Microfacet : public Material {

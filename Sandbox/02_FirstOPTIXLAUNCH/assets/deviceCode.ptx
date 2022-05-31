@@ -164,7 +164,7 @@
 	ld.param.u64 	%rd2, [__direct_callable__microfacet_sample_param_1];
 	ld.param.u64 	%rd3, [__direct_callable__microfacet_sample_param_2];
 	ld.param.u64 	%rd4, [__direct_callable__microfacet_sample_param_3];
-	ld.f32 	%f1, [%rd3+52];
+	ld.f32 	%f1, [%rd3+56];
 	mul.ftz.f32 	%f2, %f1, %f1;
 	ld.u32 	%r1, [%rd1+72];
 	mad.lo.s32 	%r2, %r1, 1664525, 1013904223;
@@ -297,7 +297,7 @@
 	div.approx.ftz.f32 	%f17, %f6, %f16;
 	div.approx.ftz.f32 	%f18, %f9, %f16;
 	div.approx.ftz.f32 	%f19, %f12, %f16;
-	ld.f32 	%f20, [%rd3+52];
+	ld.f32 	%f20, [%rd3+56];
 	mul.ftz.f32 	%f21, %f20, %f20;
 	mul.ftz.f32 	%f22, %f2, %f18;
 	fma.rn.ftz.f32 	%f23, %f1, %f17, %f22;
@@ -367,12 +367,12 @@
 	mov.u32 	%r12, %r10;
 	@%p1 bra 	$L__BB5_2;
 
-	ld.f32 	%f19, [%rd1+52];
+	ld.f32 	%f19, [%rd1+56];
 	sqrt.approx.ftz.f32 	%f20, %f10;
 	div.approx.ftz.f32 	%f21, %f3, %f20;
 	div.approx.ftz.f32 	%f22, %f6, %f20;
 	div.approx.ftz.f32 	%f23, %f9, %f20;
-	ld.f32 	%f24, [%rd1+56];
+	ld.f32 	%f24, [%rd1+60];
 	mov.f32 	%f25, 0f3F800000;
 	sub.ftz.f32 	%f26, %f25, %f24;
 	ld.f32 	%f27, [%rd1+16];
@@ -470,12 +470,12 @@ $L__BB5_2:
 	ret;
 
 }
-	// .globl	__direct_callable__metal_sample
-.visible .func  (.param .align 4 .b8 func_retval0[12]) __direct_callable__metal_sample(
-	.param .b64 __direct_callable__metal_sample_param_0,
-	.param .b64 __direct_callable__metal_sample_param_1,
-	.param .b64 __direct_callable__metal_sample_param_2,
-	.param .b64 __direct_callable__metal_sample_param_3
+	// .globl	__direct_callable__bsdf_sample
+.visible .func  (.param .align 4 .b8 func_retval0[12]) __direct_callable__bsdf_sample(
+	.param .b64 __direct_callable__bsdf_sample_param_0,
+	.param .b64 __direct_callable__bsdf_sample_param_1,
+	.param .b64 __direct_callable__bsdf_sample_param_2,
+	.param .b64 __direct_callable__bsdf_sample_param_3
 )
 {
 	.reg .f32 	%f<17>;
@@ -483,8 +483,8 @@ $L__BB5_2:
 	.reg .b64 	%rd<3>;
 
 
-	ld.param.u64 	%rd1, [__direct_callable__metal_sample_param_1];
-	ld.param.u64 	%rd2, [__direct_callable__metal_sample_param_3];
+	ld.param.u64 	%rd1, [__direct_callable__bsdf_sample_param_1];
+	ld.param.u64 	%rd2, [__direct_callable__bsdf_sample_param_3];
 	ld.f32 	%f1, [%rd2];
 	ld.f32 	%f2, [%rd1];
 	ld.f32 	%f3, [%rd2+4];
@@ -510,13 +510,13 @@ $L__BB5_2:
 	ret;
 
 }
-	// .globl	__direct_callable__metal_pdf
-.visible .func  (.param .b32 func_retval0) __direct_callable__metal_pdf(
-	.param .b64 __direct_callable__metal_pdf_param_0,
-	.param .b64 __direct_callable__metal_pdf_param_1,
-	.param .b64 __direct_callable__metal_pdf_param_2,
-	.param .b64 __direct_callable__metal_pdf_param_3,
-	.param .b64 __direct_callable__metal_pdf_param_4
+	// .globl	__direct_callable__bsdf_pdf
+.visible .func  (.param .b32 func_retval0) __direct_callable__bsdf_pdf(
+	.param .b64 __direct_callable__bsdf_pdf_param_0,
+	.param .b64 __direct_callable__bsdf_pdf_param_1,
+	.param .b64 __direct_callable__bsdf_pdf_param_2,
+	.param .b64 __direct_callable__bsdf_pdf_param_3,
+	.param .b64 __direct_callable__bsdf_pdf_param_4
 )
 {
 	.reg .f32 	%f<2>;
@@ -527,13 +527,13 @@ $L__BB5_2:
 	ret;
 
 }
-	// .globl	__direct_callable__metal_eval
-.visible .func  (.param .align 4 .b8 func_retval0[12]) __direct_callable__metal_eval(
-	.param .b64 __direct_callable__metal_eval_param_0,
-	.param .b64 __direct_callable__metal_eval_param_1,
-	.param .b64 __direct_callable__metal_eval_param_2,
-	.param .b64 __direct_callable__metal_eval_param_3,
-	.param .b64 __direct_callable__metal_eval_param_4
+	// .globl	__direct_callable__bsdf_eval
+.visible .func  (.param .align 4 .b8 func_retval0[12]) __direct_callable__bsdf_eval(
+	.param .b64 __direct_callable__bsdf_eval_param_0,
+	.param .b64 __direct_callable__bsdf_eval_param_1,
+	.param .b64 __direct_callable__bsdf_eval_param_2,
+	.param .b64 __direct_callable__bsdf_eval_param_3,
+	.param .b64 __direct_callable__bsdf_eval_param_4
 )
 {
 	.reg .b32 	%r<2>;
@@ -710,7 +710,7 @@ $L__BB10_2:
 $L__BB10_3:
 	st.f32 	[%rd3+8], %f214;
 	st.u32 	[%rd3+60], %r5;
-	ld.u32 	%r13, [%rd4+64];
+	ld.u32 	%r13, [%rd4+68];
 	// begin inline asm
 	call (%rd20), _optix_call_direct_callable,(%r13);
 	// end inline asm
@@ -807,7 +807,7 @@ $L__BB10_3:
 	ld.const.f32 	%f146, [optixLaunchParams+128];
 	mul.ftz.f32 	%f147, %f17, %f146;
 	sub.ftz.f32 	%f19, %f145, %f147;
-	ld.u32 	%r14, [%rd4+60];
+	ld.u32 	%r14, [%rd4+64];
 	// begin inline asm
 	call (%rd21), _optix_call_direct_callable,(%r14);
 	// end inline asm
@@ -837,7 +837,7 @@ $L__BB10_3:
 	, prototype_1;
 	ld.param.f32 	%f148, [retval0+0];
 	} // callseq 1
-	ld.u32 	%r15, [%rd4+68];
+	ld.u32 	%r15, [%rd4+72];
 	// begin inline asm
 	call (%rd22), _optix_call_direct_callable,(%r15);
 	// end inline asm
@@ -908,7 +908,7 @@ $L__BB10_3:
 	add.ftz.f32 	%f177, %f14, 0fBC23D70A;
 	mov.f32 	%f176, 0f3C23D70A;
 	mov.f32 	%f181, 0f00000000;
-	mov.u32 	%r64, 4;
+	mov.u32 	%r64, 13;
 	mov.u32 	%r66, 2;
 	// begin inline asm
 	call(%r30,%r31,%r32,%r33,%r34,%r35,%r36,%r37,%r38,%r39,%r40,%r41,%r42,%r43,%r44,%r45,%r46,%r47,%r48,%r49,%r50,%r51,%r52,%r53,%r54,%r55,%r56,%r57,%r58,%r59,%r60,%r61),_optix_trace_typed_32,(%r5,%rd27,%f1,%f2,%f3,%f15,%f16,%f17,%f176,%f177,%f181,%r7,%r64,%r7,%r66,%r7,%r7,%r5,%r101,%r102,%r103,%r104,%r105,%r106,%r107,%r108,%r109,%r110,%r111,%r112,%r113,%r114,%r115,%r116,%r117,%r118,%r119,%r120,%r121,%r122,%r123,%r124,%r125,%r126,%r127,%r128,%r129,%r130,%r131);

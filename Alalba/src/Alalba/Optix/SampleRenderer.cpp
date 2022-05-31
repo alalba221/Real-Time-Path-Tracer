@@ -534,17 +534,17 @@ namespace Alalba {
     pgDesc[MICROFACET_EVAL].callables.moduleDC = module;
     pgDesc[MICROFACET_EVAL].callables.entryFunctionNameDC = "__direct_callable__microfacet_eval";
 
-    pgDesc[METAL_SAMPLE].kind = OPTIX_PROGRAM_GROUP_KIND_CALLABLES;
-    pgDesc[METAL_SAMPLE].callables.moduleDC = module;
-    pgDesc[METAL_SAMPLE].callables.entryFunctionNameDC = "__direct_callable__metal_sample";
+    pgDesc[BSDF_SAMPLE].kind = OPTIX_PROGRAM_GROUP_KIND_CALLABLES;
+    pgDesc[BSDF_SAMPLE].callables.moduleDC = module;
+    pgDesc[BSDF_SAMPLE].callables.entryFunctionNameDC = "__direct_callable__bsdf_sample";
 
-    pgDesc[METAL_PDF].kind = OPTIX_PROGRAM_GROUP_KIND_CALLABLES;
-    pgDesc[METAL_PDF].callables.moduleDC = module;
-    pgDesc[METAL_PDF].callables.entryFunctionNameDC = "__direct_callable__metal_pdf";
+    pgDesc[BSDF_PDF].kind = OPTIX_PROGRAM_GROUP_KIND_CALLABLES;
+    pgDesc[BSDF_PDF].callables.moduleDC = module;
+    pgDesc[BSDF_PDF].callables.entryFunctionNameDC = "__direct_callable__bsdf_pdf";
 
-    pgDesc[METAL_EVAL].kind = OPTIX_PROGRAM_GROUP_KIND_CALLABLES;
-    pgDesc[METAL_EVAL].callables.moduleDC = module;
-    pgDesc[METAL_EVAL].callables.entryFunctionNameDC = "__direct_callable__metal_eval";
+    pgDesc[BSDF_EVAL].kind = OPTIX_PROGRAM_GROUP_KIND_CALLABLES;
+    pgDesc[BSDF_EVAL].callables.moduleDC = module;
+    pgDesc[BSDF_EVAL].callables.entryFunctionNameDC = "__direct_callable__bsdf_eval";
 
     char log[2048];
     size_t sizeof_log = sizeof(log);
@@ -680,6 +680,19 @@ namespace Alalba {
             
             }
             break;
+          case m_type::BSDF:
+          {
+            BSDF* p = (BSDF*)(model->meshes[meshID]->material);
+            rec.data.eval_id = BSDF_EVAL;
+            rec.data.sample_id = BSDF_SAMPLE;
+            rec.data.pdf_id = BSDF_PDF;
+            rec.data.roughness = p->roughness;
+            rec.data.eta = p->eta;
+            rec.data.albedo = p->albedo;
+            //rec.data.kd = p->kd;
+
+          }
+          break;
           default:
             assert(0);
         }

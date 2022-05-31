@@ -78,6 +78,7 @@ namespace Alalba {
 
 		m_Rotation = glm::eulerAngles(orientation) * (180.0f / (float)M_PI);
 		m_ViewMatrix = glm::toMat4(glm::conjugate(orientation)) * glm::translate(glm::mat4(1.0f), -m_Position);
+		
 		// T*R*S
 		//m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(orientation);
 		//m_ViewMatrix = glm::inverse(m_ViewMatrix);

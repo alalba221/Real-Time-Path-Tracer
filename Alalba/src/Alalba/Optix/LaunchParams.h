@@ -31,6 +31,8 @@ namespace Alalba {
     gdt::vec3f  albedo;
     gdt::vec3f emission;
     gdt::vec3f kd;
+
+    float eta;
     float roughness;
     float metallic;
     int pdf_id, sample_id, eval_id;
@@ -47,9 +49,9 @@ namespace Alalba {
     MICROFACET_SAMPLE,
     MICROFACET_PDF,
     MICROFACET_EVAL,
-    METAL_SAMPLE,
-    METAL_PDF,
-    METAL_EVAL,
+    BSDF_SAMPLE,
+    BSDF_PDF,
+    BSDF_EVAL,
     CALLABLE_PGS,
   }; // callable id
 

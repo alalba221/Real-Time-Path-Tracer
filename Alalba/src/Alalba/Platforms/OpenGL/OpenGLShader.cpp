@@ -242,7 +242,7 @@ namespace Alalba {
 		if (location != -1)
 			glUniform1i(location, value);
 		else
-			ALALBA_LOG_UNIFORM("Uniform '{0}' not found from OpenGLshader.cpp!", name);
+			ALALBA_LOG_UNIFORM("Uniform '{0}' not found from OpenGLshader.cpp!{1}!", name, m_Name);
 	}
 
 	void OpenGLShader::UploadUniformFloat(const std::string& name, float value)
@@ -252,7 +252,7 @@ namespace Alalba {
 		if (location != -1)
 			glUniform1f(location, value);
 		else
-			ALALBA_LOG_UNIFORM("Uniform '{0}' not found from OpenGLshader.cpp!", name);
+			ALALBA_LOG_UNIFORM("Uniform '{0}' not found from OpenGLshader.cpp,{1}!", name, m_Name);
 
 	}
 	void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& values)

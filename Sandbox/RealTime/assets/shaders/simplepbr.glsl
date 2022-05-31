@@ -24,7 +24,7 @@ uniform mat4 u_ModelMatrix;
 out VertexOutput
 {
 	vec3 WorldPosition;
-	vec3 Normal;
+    vec3 Normal;
 	vec2 TexCoord;
 	mat3 WorldNormals;
 } vs_Output;
@@ -32,7 +32,7 @@ out VertexOutput
 void main()
 {
 	vs_Output.WorldPosition = vec3(mat4(u_ModelMatrix) * vec4(a_Position, 1.0));
-	vs_Output.Normal = a_Normal;
+    vs_Output.Normal = a_Normal;
 	vs_Output.TexCoord = vec2(a_TexCoord.x, 1.0 - a_TexCoord.y);
 	vs_Output.WorldNormals = mat3(u_ModelMatrix) * mat3(a_Tangent, a_Binormal, a_Normal);
 
@@ -58,7 +58,7 @@ struct Light {
 in VertexOutput
 {
 	vec3 WorldPosition;
-	vec3 Normal;
+    vec3 Normal;
 	vec2 TexCoord;
 	mat3 WorldNormals;
 } vs_Input;
@@ -117,9 +117,8 @@ float ndfGGX(float cosLh, float roughness)
 	float denom = (cosLh * cosLh) * (alphaSq - 1.0) + 1.0;
 	return alphaSq / (PI * denom * denom);
 }
-/// G version 1
+
 // Single term for separable Schlick-GGX below.
-// cosTheta = normal dot view
 float gaSchlickG1(float cosTheta, float k)
 {
 	return cosTheta / (cosTheta * (1.0 - k) + k);
@@ -132,10 +131,7 @@ float gaSchlickGGX(float cosLi, float NdotV, float roughness)
 	float k = (r * r) / 8.0; // Epic suggests using this roughness remapping for analytic lights.
 	return gaSchlickG1(cosLi, k) * gaSchlickG1(NdotV, k);
 }
-///--------End G 1--------------
 
-/// G version 2
-/// from learnopengl
 float GeometrySchlickGGX(float NdotV, float roughness)
 {
     float r = (roughness + 1.0);
@@ -156,14 +152,11 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 
     return ggx1 * ggx2;
 }
-///------------- end G 2---------------------
-
 
 // Shlick's approximation of the Fresnel factor.
 vec3 fresnelSchlick(vec3 F0, float cosTheta)
 {
 	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
-	// return F0 + exp2((-5.55473f * HoW - 6.98316f) * HoW) * (DEFAULT_F90 - F0);
 }
 
 vec3 fresnelSchlickRoughness(vec3 F0, float cosTheta, float roughness)
@@ -299,7 +292,7 @@ void main()
 	m_Params.Albedo = u_AlbedoTexToggle > 0.5 ? texture(u_AlbedoTexture, vs_Input.TexCoord).rgb : u_AlbedoColor; 
 	m_Params.Metalness = u_MetalnessTexToggle > 0.5 ? texture(u_MetalnessTexture, vs_Input.TexCoord).r : u_Metalness;
 	m_Params.Roughness = u_RoughnessTexToggle > 0.5 ?  texture(u_RoughnessTexture, vs_Input.TexCoord).r : u_Roughness;
-	m_Params.Roughness = max(m_Params.Roughness, 0.05); // Minimum roughness of 0.05 to keep specular highlight
+    m_Params.Roughness = max(m_Params.Roughness, 0.05); // Minimum roughness of 0.05 to keep specular highlight
 
 	// Normals (either from vertex or map)
 	m_Params.Normal = normalize(vs_Input.Normal);
