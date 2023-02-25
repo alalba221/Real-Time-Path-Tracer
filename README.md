@@ -1,6 +1,6 @@
 # Real Time Renderer
 
-<img src="C:\Users\xinhu\OneDrive\桌面\CPSC8500\Cover.png" alt="Cover" style="zoom: 33%;" />
+<img src="https://github.com/alalba221/Alalba/blob/main/image/0.png" alt="Cover" style="zoom: 100%;" />
 
 
 
@@ -103,7 +103,7 @@ The Fresnel equation used here is an accelerated version of Schlick's approximat
 
   There are a few subtleties involved with the Fresnel equation. One is that the Fresnel-Schlick approximation is only really defined for dielectric or non-metal surfaces. For conductor surfaces (metals), calculating the base reflectivity with indices(complex number) of refraction doesn't properly hold and we need to use a different Fresnel equation for conductors altogether. As this is inconvenient, we further approximate by pre-computing the surface's response at normal incidence ($F_0$) at a 0 degree angle as if looking directly onto a surface. We interpolate this value based on the view angle, as per the Fresnel-Schlick approximation, such that we can use the same equation for both metals and non-metals.
 
-<img src="C:\Users\xinhu\AppData\Roaming\Typora\typora-user-images\image-20220428121205087.png" alt="image-20220428121205087" style="zoom:50%;" />
+<img src="https://github.com/alalba221/Alalba/blob/main/image/1.png" style="zoom:100%;" />
 
 interesting to observe here is that for **all dielectric surfaces the base reflectivity never gets above 0.17**
 
@@ -181,11 +181,11 @@ To convert it to incoming vector:
 $$
 p(\theta) = \frac{p_h(\theta_h)}{4(\boldsymbol{\omega}_o\cdot\boldsymbol{\omega}_h)}
 $$
-If we directly use **D** as PDF:<img src="C:\Users\xinhu\AppData\Roaming\Typora\typora-user-images\image-20220428134917698.png" alt="image-20220428134917698" style="zoom:33%;" />
+If we directly use **D** as PDF:<img src="https://github.com/alalba221/Alalba/blob/main/image/2.png" alt="image-20220428134917698" style="zoom:100%;" />
 
 Fixed :
 
-<img src="C:\Users\xinhu\AppData\Roaming\Typora\typora-user-images\image-20220428145623168.png" alt="image-20220428145623168" style="zoom: 33%;" />
+<img src="https://github.com/alalba221/Alalba/blob/main/image/3.png" alt="image-20220428145623168" style="zoom: 100%;" />
 
 ### 3. Gamma Correction
 
@@ -202,11 +202,11 @@ This non-linear mapping of monitors does output more pleasing brightness results
 
 With out gamma correction, we will lose details at the bright areas of our scene
 
-<img src="C:\Users\xinhu\AppData\Roaming\Typora\typora-user-images\image-20220428135130221.png" alt="image-20220428135130221" style="zoom:33%;" />
+<img src="https://github.com/alalba221/Alalba/blob/main/image/5.png" alt="image-20220428135130221" style="zoom:100%;" />
 
 With gamma correction
 
-<img src="C:\Users\xinhu\AppData\Roaming\Typora\typora-user-images\image-20220428145730601.png" alt="image-20220428145730601" style="zoom:33%;" />
+<img src="https://github.com/alalba221/Alalba/blob/main/image/6.png" alt="image-20220428145730601" style="zoom:100%;" />
 
 ### 4. Conclusion
 
